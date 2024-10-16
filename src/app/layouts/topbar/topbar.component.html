@@ -411,12 +411,12 @@
                 <div dropdown class="dropdown ms-sm-3 topbar-head-dropdown dropdown-hover-end header-item topbar-user">
                     <button dropdownToggle type="button" class="btn shadow-none btn-icon" id="page-header-user-dropdown">
                         <span class="d-flex align-items-center">
-                            <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg" alt="Header Avatar">
+                            <img class="rounded-circle header-profile-user" [src]="(userData$ | async)?.photo ? (userData$ | async)?.photo : 'assets/images/default/user.png'">
                         </span>
                     </button>
                     <div *dropdownMenu class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome Alexandra!</h6>
+                        <h6 class="dropdown-header">{{ (userData$ | async)?.name }}</h6>
                         <a class="dropdown-item fs-sm" routerLink="/pages/profile"><i class="bi bi-person-circle text-muted align-middle me-1"></i> <span class="align-middle"> Profile</span></a>
                         <a class="dropdown-item fs-sm" routerLink="/apps/calendar"><i class="bi bi-cart4 text-muted align-middle me-1"></i> <span class="align-middle"> Order Track</span></a>
                         <a class="dropdown-item fs-sm" routerLink="/apps/chat"><i class="bi bi-box-seam text-muted align-middle me-1"></i> <span class="align-middle"> Chat</span></a>

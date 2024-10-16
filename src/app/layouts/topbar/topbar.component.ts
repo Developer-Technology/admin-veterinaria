@@ -1,9 +1,7 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
-import { AuthenticationService } from 'src/app/core/services/auth.service';
-import { EventService } from 'src/app/core/services/event.service';
 import { LanguageService } from 'src/app/core/services/language.service';
 // Get Cart Data
 import { cartList, notification } from './data';
@@ -11,7 +9,8 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 import { RootReducerState, getLayoutMode } from 'src/app/store/reducers';
 import { Store } from '@ngrx/store';
 import { changeMode } from 'src/app/store/actions/layout-action';
-import { logout } from 'src/app/store/actions/authentication.actions';
+import { UserService } from '../../services/user.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-topbar',
@@ -20,7 +19,9 @@ import { logout } from 'src/app/store/actions/authentication.actions';
 })
 
 // Topbar Component
-export class TopbarComponent {
+export class TopbarComponent implements OnInit {
+
+  userData$: Observable<any> = this.userService.userData$;
 
   country: any;
   selectedItem!: any;
@@ -56,14 +57,16 @@ export class TopbarComponent {
   deleteid: any;
 
   constructor(@Inject(DOCUMENT) private document: any,
-    private eventService: EventService,
     public languageService: LanguageService,
-    private authService: AuthenticationService,
     private router: Router,
     private store: Store<RootReducerState>,
-    public _cookiesService: CookieService) { }
+    public _cookiesService: CookieService,
+    private userService: UserService) { }
 
   ngOnInit(): void {
+
+    this.userData$ = this.userService.getUserData();
+
     this.element = document.documentElement;
     this.cartData = cartList
     this.cartData.map((x: any) => {
@@ -339,7 +342,7 @@ export class TopbarComponent {
     e.preventDefault();
     localStorage.removeItem('isLoggedin');
     localStorage.removeItem('token');
-    
+
     if (!localStorage.getItem('isLoggedin')) {
       this.router.navigate(['/auth/login']);
     }
