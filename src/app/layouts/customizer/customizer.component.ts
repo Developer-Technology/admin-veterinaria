@@ -40,7 +40,7 @@ export class CustomizerComponent {
   ngOnInit(): void {
 
     // Subscribe to the state changes
-    this.initialAppState = initialState;
+    /*this.initialAppState = initialState;
 
     this.store.select('layout').subscribe((data) => {
       this.layout = data.LAYOUT_THEME;
@@ -58,7 +58,7 @@ export class CustomizerComponent {
     this.openEnd();
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
-    }, 0);
+    }, 0);*/
   }
 
   // When the user clicks on the button, scroll to the top of the document

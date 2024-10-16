@@ -10,8 +10,8 @@
                                 <div class="card mb-0 border-0 shadow-none mb-0">
                                     <div class="card-body p-sm-5 m-lg-4">
                                         <div class="text-center mt-5">
-                                            <h5 class="fs-3xl">Welcome Back</h5>
-                                            <p class="text-muted">Sign in to continue to Vixon.</p>
+                                            <h5 class="fs-3xl">¡Bienvenido de nuevo!</h5>
+                                            <p class="text-muted">Inicia sesión para continuar.</p>
                                         </div>
                                         <div class="p-2 mt-4">
                                             <form (ngSubmit)="onSubmit()">
@@ -58,16 +58,20 @@
                                                 </div>
                                                 <div class="mt-4">
                                                     <button class="btn btn-primary w-100" type="submit"
-                                                        [disabled]="!isFormValid() || isLoading">Sign In</button>
+                                                        [disabled]="!isFormValid() || isLoading"><span
+                                                            *ngIf="!isLoading">Iniciar Sesión</span>
+                                                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm"
+                                                            role="status" aria-hidden="true"></span>
+                                                        <span *ngIf="isLoading" class="sr-only"></span></button>
                                                 </div>
                                             </form>
 
-                                            <div class="text-center mt-5">
+                                            <!--<div class="text-center mt-5">
                                                 <p class="mb-1">Don't have an account yet?</p>
                                                 <a routerLink="/auth/register"
                                                     class="text-secondary text-decoration-underline"> Create an
                                                     account</a>
-                                            </div>
+                                            </div>-->
                                         </div>
                                     </div><!-- end card body -->
                                 </div><!-- end card -->
@@ -77,21 +81,21 @@
                                 <div class="card auth-card h-100 border-0 shadow-none d-none d-sm-block mb-0">
                                     <div class="card-body py-5 d-flex justify-content-between flex-column">
                                         <div class="text-center">
-                                            <h5 class="text-white">Nice to see you again</h5>
-                                            <p class="text-white opacity-75">Enter your details and start your journey
-                                                with us.</p>
+                                            <h5 class="text-white">Nos alegra verte de nuevo</h5>
+                                            <p class="text-white opacity-75">Introduce tus datos y continúa gestionando
+                                                tus clientes y mascotas.</p>
                                         </div>
                                         <div
                                             class="auth-effect-main my-5 position-relative rounded-circle d-flex align-items-center justify-content-center mx-auto">
                                             <div class="auth-user-list list-unstyled">
-                                                <img src="assets/images/auth/signin.png" alt="" class="img-fluid">
+                                                <img src="assets/images/auth/login.svg" alt="" class="img-fluid">
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <p class="text-white opacity-75 mb-0 mt-3">
                                                 &copy;
-                                                {{year}} Vixon. Crafted with <i
-                                                    class="ti ti-heart-filled text-danger"></i> by Themesbrand
+                                                2014 - {{year}} Chanamoth. Desarrollado con <i
+                                                    class="ti ti-heart-filled text-danger"></i>
                                             </p>
                                         </div>
                                     </div>
