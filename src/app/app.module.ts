@@ -1,18 +1,14 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 // Page Route
 import { AppRoutingModule } from './app-routing.module';
 import { LayoutsModule } from './layouts/layouts.module';
-
 // toaster
 import { ToastrModule } from 'ngx-toastr';
-
 // Laguage
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-
 // Auth
 import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { environment } from '../environments/environment';
@@ -22,17 +18,14 @@ import { ErrorInterceptor } from './core/helpers/error.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-
 // Store
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { rootReducer } from 'src/app/store/reducers';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { AuthenticationEffects } from './store/effects/authentication.effects';
-
 // Component
 import { AppComponent } from './app.component';
-
 // Store Effect
 import { InvoiceEffects } from './store/effects/invoce.effects';
 import { ContactEffects } from './store/effects/contact.effect';
