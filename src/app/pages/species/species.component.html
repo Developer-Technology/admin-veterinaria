@@ -1,0 +1,32 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Especies" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Gestión de Especies</h4>
+            </div><!-- end card header -->
+
+            <div class="card-body">
+                <div id="customerList">
+
+                    <div *ngIf="isLoading" class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div>
+                    </div>
+
+                    <app-datatable *ngIf="!isLoading" [columns]="[
+                        { label: 'Nombre', key: 'specieName', sortable: true }
+                      ]" [data]="species" [itemsPerPage]="5" [actions]="actions">
+                    </app-datatable>
+
+                </div>
+            </div><!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+    <!-- end col -->
+</div>

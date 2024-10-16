@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 // Page Route
 import { PagesRoutingModule } from './pages-routing.module';
 import { SharedModule } from '../shared/shared.module';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 @NgModule({
   declarations: [
@@ -11,7 +12,8 @@ import { SharedModule } from '../shared/shared.module';
   imports: [
     CommonModule,
     PagesRoutingModule,
-    SharedModule
+    SharedModule,
+    BsDropdownModule
   ]
 })
 export class PagesModule { }

@@ -6,23 +6,26 @@
 
 <!-- Mostrar el buscador solo si hay datos en la tabla -->
 <div *ngIf="data.length > 0">
-    <!-- Buscador -->
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-6">
-            <input type="text" class="form-control form-control-sm" placeholder="Buscar..." [(ngModel)]="searchQuery"
-                (input)="onSearch()">
-        </div>
-        <!-- Exportar -->
-        <div class="col-md-6 text-end">
-            <div ngbDropdown>
-                <button class="btn btn-outline-primary btn-xs" id="dropdownBasic1" ngbDropdownToggle>
-                    <i class="icon feather icon-download-cloud"></i> Exportar
-                </button>
-                <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                    <button ngbDropdownItem>PDF</button>
-                    <button ngbDropdownItem>Excel</button>
+
+    <div class="row g-4 mb-3">
+        <div class="col-sm-auto">
+            <div dropdown class="btn-group">
+                <button type="button" dropdownToggle class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Light</button>
+                <div *dropdownMenu class="dropdown-menu">
+                    <a class="dropdown-item" href="javascript:void(0);">Action</a>
+                    <a class="dropdown-item" href="javascript:void(0);">Another action</a>
+                    <a class="dropdown-item" href="javascript:void(0);">Something else here</a>
                     <div class="dropdown-divider"></div>
-                    <button ngbDropdownItem>Imprimir</button>
+                    <a class="dropdown-item" href="javascript:void(0);">Separated link</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm">
+            <div class="d-flex justify-content-sm-end">
+                <div class="search-box ms-2">
+                    <input type="text" class="form-control search" placeholder="Buscar..." [(ngModel)]="searchQuery"
+                        (input)="onSearch()">
+                    <i class="ri-search-line search-icon"></i>
                 </div>
             </div>
         </div>
@@ -34,24 +37,22 @@
         <p class="mb-0 text-muted small"><strong>{{ showingRecords }}</strong></p>
     </div>
 
-    <!-- Tabla de datos -->
-    <div class="table-responsive">
-        <table class="table table-sm table-bordered align-middle compact-table">
-            <thead>
+    <div class="table-responsive table-card mt-3 mb-1">
+        <table class="table align-middle table-nowrap" id="customerTable">
+            <thead class="table-light">
                 <tr>
-                    <th>#</th>
-                    <th *ngFor="let column of columns" [class.sortable-column]="column.sortable"
-                        (click)="column.sortable && sortData(column.key)">
-                        {{ column.label }}
+                    <th scope="col" style="width: 50px;">#</th>
+                    <th class="sort" *ngFor="let column of columns" [class.sortable-column]="column.sortable"
+                        (click)="column.sortable && sortData(column.key)">{{ column.label }}
                         <i *ngIf="column.sortable" [ngClass]="getSortIcon(column.key)"></i>
                     </th>
-                    <th></th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr *ngFor="let item of paginatedData; let i = index">
-                    <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
+            <tbody class="list form-check-all">
 
+                <tr *ngFor="let item of paginatedData; let i = index">
+                    <th scope="row">{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</th>
                     <!-- Verifica si el campo requiere el diseño personalizado -->
                     <td *ngFor="let column of columns">
                         <ng-container *ngIf="column.customField; else defaultColumn">
@@ -64,68 +65,89 @@
                             {{ item[column.key] }}
                         </ng-template>
                     </td>
-                    <td class="text-center btn-table">
-                        <div ngbDropdown>
-                            <button class="btn btn-outline-primary btn-xs" ngbDropdownToggle>
-                                <i class="icon feather icon-settings"></i>
-                            </button>
-                            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                                <button *ngFor="let action of actions" ngbDropdownItem
+                    <td>
+                        <div class="d-flex gap-2">
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <button *ngFor="let action of actions" type="button" class="btn btn-sm btn-light"
                                     (click)="isActionVisible(action, item) && action.onClick(item)"
-                                    [disabled]="!isActionVisible(action, item)">
-                                    {{ action.label }}
-                                </button>
+                                    [disabled]="!isActionVisible(action, item)">{{ action.label }}</button>
                             </div>
                         </div>
                     </td>
                 </tr>
-
-                <!-- Mensaje para cuando no se encuentran resultados tras realizar una búsqueda -->
-                <tr *ngIf="filteredData.length === 0 && searchQuery">
-                    <td [attr.colspan]="columns.length + 2" class="text-center">No se encontraron coincidencias.</td>
-                </tr>
             </tbody>
         </table>
+        <div class="noresult" *ngIf="filteredData.length === 0 && searchQuery">
+            <div class="text-center">
+                <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>
+                <h5 class="mt-2">Ups! No encontramos lo que buscas.</h5>
+                <p class="text-muted mb-0">Parece que no hay resultados que coincidan con tu búsqueda.<br>¡Intenta de nuevo con otros términos!</p>
+            </div>
+        </div>
     </div>
 
     <!-- Paginación -->
-    <div class="row align-items-center">
+    <div class="row align-items-center" *ngFor="let item of paginatedData; let i = index">
         <div class="col-md-6 d-flex align-items-center pagin">
             <span class="me-2">Ir a página:</span>
-            <select class="form-select form-select-sm w-auto" [(ngModel)]="currentPage"
-                (change)="changePage(currentPage)">
+            <select class="form-select form-select w-auto" [(ngModel)]="currentPage" (change)="changePage(currentPage)">
                 <option *ngFor="let page of totalPages" [value]="page">{{ page }}</option>
             </select>
             <span class="ms-3 me-2">Mostrar:</span>
-            <select class="form-select form-select-sm w-auto" [(ngModel)]="itemsPerPage"
+            <select class="form-select form-select w-auto" [(ngModel)]="itemsPerPage"
                 (change)="onChangeItemsPerPage($event)">
                 <option [value]="5">5</option>
                 <option [value]="10">10</option>
                 <option [value]="20">20</option>
             </select>
         </div>
-        <div class="col-md-6 text-end mt-3">
-            <nav>
-                <ul class="pagination pagination-sm justify-content-end">
-                    <li class="page-item" [class.disabled]="currentPage === 1">
-                        <a class="page-link" (click)="changePage(1)">««</a>
-                    </li>
-                    <li class="page-item" [class.disabled]="currentPage === 1">
-                        <a class="page-link" (click)="changePage(currentPage - 1)">«</a>
-                    </li>
-                    <li *ngFor="let page of compactTotalPages" class="page-item" [class.active]="currentPage === page"
-                        [class.disabled]="page === -1">
+        <div class="col-md-6 d-flex justify-content-end">
+
+            <div class="pagination-wrap hstack gap-2">
+                <a class="page-item pagination-prev" [class.disabled]="currentPage === 1" (click)="changePage(1)">
+                    ««
+                </a>
+                <a class="page-item pagination-prev" [class.disabled]="currentPage === 1"
+                    (click)="changePage(currentPage - 1)">
+                    «
+                </a>
+                <ul class="pagination listjs-pagination mb-0">
+                    <li class="pagination-page page-item" *ngFor="let page of compactTotalPages"
+                        [class.active]="currentPage === page" [class.disabled]="page === -1">
                         <a *ngIf="page !== -1" class="page-link" (click)="changePage(page)">{{ page }}</a>
                         <span *ngIf="page === -1" class="page-link">...</span>
                     </li>
-                    <li class="page-item" [class.disabled]="currentPage === totalPages.length">
-                        <a class="page-link" (click)="changePage(currentPage + 1)">»</a>
-                    </li>
-                    <li class="page-item" [class.disabled]="currentPage === totalPages.length">
-                        <a class="page-link" (click)="changePage(totalPages.length)">»»</a>
-                    </li>
                 </ul>
-            </nav>
+                <a class="page-item pagination-next" [class.disabled]="currentPage === totalPages.length"
+                    (click)="changePage(currentPage + 1)">
+                    »
+                </a>
+                <a class="page-item pagination-next" [class.disabled]="currentPage === totalPages.length"
+                    (click)="changePage(totalPages.length)">
+                    »»
+                </a>
+
+                <!--<nav>
+                    <ul class="pagination pagination-sm justify-content-end">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="changePage(1)">««</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="changePage(currentPage - 1)">«</a>
+                        </li>
+                        <li *ngFor="let page of compactTotalPages" class="page-item"
+                            [class.active]="currentPage === page" [class.disabled]="page === -1">
+                            <a *ngIf="page !== -1" class="page-link" (click)="changePage(page)">{{ page }}</a>
+                            <span *ngIf="page === -1" class="page-link">...</span>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages.length">
+                            <a class="page-link" (click)="changePage(currentPage + 1)">»</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages.length">
+                            <a class="page-link" (click)="changePage(totalPages.length)">»»</a>
+                        </li>
+                    </ul>
+                </nav>-->
+            </div>
         </div>
     </div>
-</div>
