@@ -1,95 +1,89 @@
-import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-
-import { Store, select } from '@ngrx/store';
-import { login, signInWithFacebook, signInWithGoogle } from 'src/app/store/actions/authentication.actions';
-import { AuthenticationService } from 'src/app/core/services/auth.service';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../services/api.service';
+import { UtilitiesService } from '../../services/utilities.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
-  // Login Form
-  loginForm!: UntypedFormGroup;
-  submitted = false;
-  fieldTextType!: boolean;
-  error = '';
-  returnUrl!: string;
+export class LoginComponent implements OnInit {
 
-  toast!: false;;
-
-  // set the current year
   year: number = new Date().getFullYear();
+  fieldTextType!: boolean;
+  email: string = '';
+  password: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
+  returnUrl: any;
+  emailTouched: boolean = false;  // Para verificar si el usuario interactuó con el campo
+  passwordTouched: boolean = false;  // Para verificar si el usuario interactuó con el campo
+  validationErrors: any = {}; // Almacenar errores de validación
 
-  constructor(private formBuilder: UntypedFormBuilder, private store: Store, private router: Router, private route: ActivatedRoute, private AuthenticationService: AuthenticationService) {
-    // redirect to home if already logged in
-    // this.store.select(state => state.Authentication).subscribe(authState => {
-    //   this.isLoggedIn = !!authState.user;
-    //   this.currentUser = authState.user;
-    // });
-
-    if (this.AuthenticationService.currentUserValue) {
-      this.router.navigate(['/']);
-    }
-  }
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private utilitiesService: UtilitiesService
+  ) { }
 
   ngOnInit(): void {
-    if (localStorage.getItem('currentUser')) {
-      this.router.navigate(['/']);
-    }
-    /**
-     * Form Validatyion
-     */
-    this.loginForm = this.formBuilder.group({
-      email: ['admin@themesbrand.com', [Validators.required, Validators.email]],
-      password: ['123456', [Validators.required]],
-    });
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
-  // convenience getter for easy access to form fields
-  get f() { return this.loginForm.controls; }
-
-  signInWithFacebook() {
-    this.AuthenticationService.signInWithFacebook().then(user => {
-      // Handle successful sign-in
-      this.store.dispatch(signInWithFacebook({ user }));
-    })
-      .catch(error => {
-        // Handle sign-in error
-        console.error('Sign-in error:', error);
-      });
+  // Este método se llama cuando el usuario interactúa con el campo de correo
+  onEmailInput() {
+    this.emailTouched = true;
+    this.validationErrors.email = null; // Limpiar el error al interactuar
   }
 
-  signInWithGoogle() {
-    this.AuthenticationService.signInWithGoogle().then(user => {
-      this.store.dispatch(signInWithGoogle({ user }));
-    })
-      .catch(error => {
-        // Handle sign-out error
-        console.error('Sign-out error:', error);
-      });
+  // Este método se llama cuando el usuario interactúa con el campo de contraseña
+  onPasswordInput() {
+    this.passwordTouched = true;
+    this.validationErrors.password = null; // Limpiar el error al interactuar
   }
 
-  /**
-   * Form submit
-   */
+  // Valida si el formulario es válido (ambos campos con algún valor)
+  isFormValid(): boolean {
+    return this.email.trim() !== '' && this.password.trim() !== '';
+  }
+
   onSubmit() {
-    this.submitted = true;
+    if (!this.isFormValid()) return;
 
-    const email = this.f['email'].value; // Get the username from the form
-    const password = this.f['password'].value; // Get the password from the form
-
-    // Login Api
-    this.store.dispatch(login({ email: email, password: password }));
+    this.isLoading = true;
+    this.validationErrors = {}; // Limpiar errores previos
+    this.apiService.post('auth/login', { email: this.email, password: this.password }).subscribe(
+      (response) => {
+        if (response.success) {
+          localStorage.setItem('isLoggedin', 'true');
+          localStorage.setItem('token', response.token);
+          this.router.navigate([this.returnUrl]);
+        } else {
+          this.isLoading = false;
+          this.utilitiesService.showAlert('error', response.message);
+        }
+      },
+      (error) => {
+        this.isLoading = false;
+        if (error.status === 422) {  // Errores de validación
+          this.validationErrors = error.error.errors; // Capturamos los errores del API
+        } else {
+          this.utilitiesService.showAlert('error', error.error.message);
+        }
+      }
+    );
   }
 
-  /**
-   * Password Hide/Show
-   */
+  isValidEmail(email: string): boolean {
+    const emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    return emailPattern.test(email);
+  }
+
   toggleFieldTextType() {
     this.fieldTextType = !this.fieldTextType;
   }
+
 }
