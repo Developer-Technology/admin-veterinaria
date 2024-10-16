@@ -3,14 +3,18 @@ import { Routes, RouterModule } from '@angular/router';
 // Component
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+// Guard
+import { LoginGuard } from '../core/guards/login.guard';
 
 const routes: Routes = [
   {
-    path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+    path: 'auth', 
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    canActivate: [LoginGuard] // Asegura que no pueda acceder al login si ya está logueado
   },
   {
     path: 'register',

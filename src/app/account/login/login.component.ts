@@ -52,10 +52,11 @@ export class LoginComponent implements OnInit {
     if (!this.isFormValid()) return;
 
     this.isLoading = true;
-    this.validationErrors = {};
+    this.validationErrors = {}; // Limpiar errores previos
     this.apiService.post('auth/login', { email: this.email, password: this.password }).subscribe(
       (response) => {
         if (response.success) {
+          //this.utilitiesService.showAlert('success', 'Bienvenido');
           localStorage.setItem('isLoggedin', 'true');
           localStorage.setItem('token', response.token);
           this.router.navigate([this.returnUrl]);
@@ -66,18 +67,10 @@ export class LoginComponent implements OnInit {
       },
       (error) => {
         this.isLoading = false;
-
-        // Verificar si el error es texto plano y forzar el parseo a JSON
-        try {
-          const parsedError = typeof error.error === 'string' ? JSON.parse(error.error) : error.error;
-          console.log('Error parseado:', parsedError);
-
-          if (parsedError.errors) {
-            this.validationErrors = parsedError.errors; // Usamos los errores de validación
-          }
-        } catch (e) {
-          console.error('Error al parsear la respuesta del servidor:', e);
-          this.utilitiesService.showAlert('error', 'Error al procesar la respuesta.');
+        if (error.status === 422) {  // Errores de validación
+          this.validationErrors = error.error.errors; // Capturamos los errores del API
+        } else {
+          this.utilitiesService.showAlert('error', error.error.message);
         }
       }
     );

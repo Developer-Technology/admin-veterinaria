@@ -6,9 +6,13 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layouts/layout.component';
 
 const routes: Routes = [
-  { path: '', component: LayoutComponent, loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule), canActivate: [AuthGuard] },
+  { 
+    path: '', 
+    component: LayoutComponent, 
+    loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule), 
+    canActivate: [AuthGuard]  // Proteger el acceso al dashboard
+  },
   { path: 'auth', loadChildren: () => import('./account/account.module').then(m => m.AccountModule) },
-  { path: 'pages',loadChildren: () => import('./extraspages/extraspages.module').then(m => m.ExtraspagesModule)},
 ];
 
 @NgModule({
