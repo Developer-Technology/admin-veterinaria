@@ -1,11 +1,11 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 // component
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { DatatableComponent } from './datatable/datatable.component';
 import { CustomFieldComponent } from './custom-field/custom-field.component';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import lottie from 'lottie-web';
 import { defineElement } from "@lordicon/element";
 
@@ -18,7 +18,8 @@ import { defineElement } from "@lordicon/element";
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    BsDropdownModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   exports: [
