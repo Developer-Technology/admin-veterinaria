@@ -22,6 +22,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { AuthenticationEffects } from './store/effects/authentication.effects';
 // Component
 import { AppComponent } from './app.component';
+import { SharedModule } from './shared/shared.module';
 // Store Effect
 import { InvoiceEffects } from './store/effects/invoce.effects';
 import { ContactEffects } from './store/effects/contact.effect';
@@ -60,7 +61,8 @@ export function createTranslateLoader(http: HttpClient): any {
     }),
     EffectsModule.forRoot([AuthenticationEffects,InvoiceEffects,ContactEffects,CalendarEffects,FileEffects,ToDoEffects,KanbanEffects]),
     AngularFireModule.initializeApp(environment.firebaseConfig),
-    AngularFireAuthModule
+    AngularFireAuthModule,
+    SharedModule
   ],
   providers: [ ],
   bootstrap: [AppComponent]
