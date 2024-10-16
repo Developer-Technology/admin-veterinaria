@@ -1,0 +1,133 @@
+/* Tablas Personalizadas Compacta */
+.table-sm th,
+.table-sm td {
+    padding: 0.3rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: #f8f9fa;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+.table td {
+    font-size: 13px;
+}
+
+.table-responsive {
+    overflow: visible !important;
+}
+
+.compact-table {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 10px;
+}
+
+.btn-table .btn-xs {
+    padding: 0.3rem 0.55rem;
+    /*font-size: 10px;*/
+}
+
+.pagin span,
+.pagin select {
+    font-size: 13px;
+}
+
+.pagin select {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.page-link {
+    font-size: 13px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.sortable-column {
+    cursor: pointer;
+    position: relative;
+}
+
+.sortable-column i {
+    margin-left: 5px;
+    color: #6c757d;
+}
+
+.icon-arrow-up {
+    content: '\25B2';
+}
+
+.icon-arrow-down {
+    content: '\25BC';
+}
+
+.icon-chevron-up-down::before {
+    content: "\2195";
+}
+
+.icon-arrow-up::before {
+    content: "\25B2";
+}
+
+.icon-arrow-down::before {
+    content: "\25BC";
+}
+
+.dropdown-menu {
+    z-index: 1050;
+    position: absolute;
+}
+
+.file-hidden {
+    display: none;
+}
+
+.btn-wd-100 {
+    width: 100%;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.border-image {
+    border: 2px solid #f1f1f1;
+}
+
+.float-right {
+    float: right !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.btn-delete-adjunt {
+    border-radius: 50%;
+    padding: 2px 5px !important;
+    top: -10px !important;
+    right: -10px !important;
+}
+
+.img-thumbnail {
+    max-height: 60px !important;
+}
+
+.img-th-card {
+    width: auto;
+    margin-top: 15px;
+}
