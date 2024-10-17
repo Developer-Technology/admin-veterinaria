@@ -3,25 +3,32 @@ import { MenuItem } from "./menu.model";
 export const MENU: MenuItem[] = [
     {
         id: 1,
-        label: 'MENUITEMS.MENU.TEXT',
+        label: 'Menú De Navegación',
         isTitle: true
     },
     {
         id: 2,
-        label: 'MENUITEMS.DASHBOARD.TEXT',
-        icon: 'ti ti-brand-google-home',
+        label: 'Dashboard',
+        icon: 'ph-house-line-thin',
+        link: '/dashboard',
+        parentId: 1
+    },
+    {
+        id: 3,
+        label: 'Mascotas',
+        icon: 'ph-twitter-logo-thin',
         subItems: [
             {
-                id: 3,
-                label: 'MENUITEMS.DASHBOARD.LIST.ANALYTICS',
-                link: '/',
-                parentId: 2
+                id: 4,
+                label: 'Especies',
+                link: '/species',
+                parentId: 3
             },
             {
                 id: 5,
                 label: 'MENUITEMS.DASHBOARD.LIST.ECOMMERCE',
                 link: '/',
-                parentId: 2
+                parentId: 3
             }
         ]
     },

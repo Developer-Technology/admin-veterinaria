@@ -1,6 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { UtilitiesService } from '../../services/utilities.service';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-species',
@@ -12,19 +13,17 @@ export class SpeciesComponent implements OnInit {
   @ViewChild('editModal') editModal!: TemplateRef<any>;
   breadCrumbItems!: Array<{}>;
   isDropup = true;
-
+  modalRef?: BsModalRef;
   species: any[] = [];  // Lista completa de especies
   isLoading: boolean = true;  // Estado de carga
   actions: any[] = [];  // Acciones que se pueden realizar en la tabla
   newSpecie: any = { specieName: '' };  // Objeto para la nueva especie
   selectedSpecie: any = null;  // Especie seleccionada para editar
   errors: any = {};  // Errores de validación
-  currentPage: number = 1;  // Página actual
-  itemsPerPage: number = 5;  // Cantidad de registros por página
 
   constructor(
     private apiService: ApiService,
-    //private modalService: NgbModal,
+    private modalService: BsModalService,
     private utilitiesService: UtilitiesService
   ) { }
 
@@ -72,10 +71,10 @@ export class SpeciesComponent implements OnInit {
     ];
   }
 
-  openAddModal(content: TemplateRef<any>): void {
+  openAddModal(addModal: TemplateRef<any>) {
     this.newSpecie = { specieName: '' };
     this.errors = {};
-    //this.modalService.open(content);
+    this.modalRef = this.modalService.show(addModal);
   }
 
   // Abrir modal para editar especie
