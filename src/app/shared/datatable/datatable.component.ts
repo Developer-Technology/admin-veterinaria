@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ApiService } from '../../services/api.service';
+import { UtilitiesService } from '../../services/utilities.service';
 
 @Component({
   selector: 'app-datatable',
@@ -12,6 +13,7 @@ export class DatatableComponent implements OnInit {
   @Input() data: any[] = [];  // Datos a mostrar
   @Input() itemsPerPage: number = 5;  // Número de elementos por página
   @Input() actions: any[] = [];  // Acciones que se pueden realizar en cada fila (editar, eliminar, etc.)
+  @Input() tableName: string = '';  // Nombre de la tabla (Recibido desde la vista)
 
   currentPage: number = 1;  // Página actual
   searchQuery: string = '';  // Filtro de búsqueda
@@ -19,11 +21,24 @@ export class DatatableComponent implements OnInit {
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   serverUrl: string;
+  masterSelected: boolean = false;  // Estado del checkbox maestro
+  selectedItems: any[] = [];  // Elementos seleccionados (IDs de los elementos seleccionados)
+  checkedValGet: any[] = [];  // IDs de los elementos seleccionados
+
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private utilitiesService: UtilitiesService
   ) {
     this.serverUrl = this.apiService.getServerUrl();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      // Actualiza los datos filtrados cuando se actualizan los datos
+      this.filteredData = [...this.data];
+      this.resetSelection();  // Restablecer la selección al cambiar los datos
+    }
   }
 
   ngOnInit(): void {
@@ -167,6 +182,117 @@ export class DatatableComponent implements OnInit {
   // Verificar si la acción es visible
   isActionVisible(action: any, item: any): boolean {
     return action.condition ? action.condition(item) : true;
+  }
+
+  isLastRecord(index: number): boolean {
+    // Verifica si el índice es uno de los últimos para habilitar el dropdown hacia arriba
+    return index >= this.paginatedData.length - 1;
+  }
+
+  // Checkbox maestro: Marcar o desmarcar todas las filas
+  checkUncheckAll(ev: any): void {
+    this.masterSelected = ev.target.checked;  // Actualizar el estado del checkbox maestro
+    this.selectedItems = [];  // Restablecer la selección
+    this.filteredData.forEach((item) => {
+      item.isSelected = this.masterSelected;  // Actualizar la selección de cada fila
+      if (this.masterSelected) {
+        this.selectedItems.push(item.id);  // Capturar los IDs de los elementos seleccionados
+      }
+    });
+    this.updateCheckedValues();  // Actualizar el array de IDs seleccionados
+  }
+
+  // Verifica si todas las filas están seleccionadas
+  isAllChecked(): boolean {
+    return this.filteredData.every(item => item.isSelected);
+  }
+
+  // Marcar/desmarcar una fila individual
+  checkItemSelection(item: any, event: any): void {
+    item.isSelected = event.target.checked;  // Actualizar el estado de selección de la fila
+    if (item.isSelected) {
+      this.selectedItems.push(item.id);  // Agregar el ID a la lista seleccionada
+    } else {
+      this.selectedItems = this.selectedItems.filter(id => id !== item.id);  // Eliminar el ID si no está seleccionado
+    }
+    this.masterSelected = this.isAllChecked();  // Verificar si todas las filas están seleccionadas
+    this.updateCheckedValues();  // Actualizar el array de IDs seleccionados
+  }
+
+  // Actualiza los elementos seleccionados
+  updateCheckedValues(): void {
+    this.checkedValGet = [...this.selectedItems];  // Clonar los elementos seleccionados en checkedValGet
+  }
+
+  // Restablece la selección al cambiar la página o actualizar los datos
+  resetSelection(): void {
+    this.masterSelected = false;
+    this.selectedItems = [];
+    this.filteredData.forEach(item => item.isSelected = false);
+    this.updateCheckedValues();
+  }
+
+  deleteSelectedItems(selectedIds: string[]): void {
+    if (selectedIds.length === 0) {
+      this.utilitiesService.showAlert('warning', 'No hay elementos seleccionados para eliminar.');
+      return;
+    }
+
+    this.utilitiesService.showConfirmationDelet('¿Estás seguro?', 'Se eliminarán ' + selectedIds.length + ' registros. ¡Esta acción no se puede deshacer!')
+      .then((result) => {
+        if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
+
+          let deleteCount = 0;  // Contador para el progreso de eliminaciones exitosas o fallidas
+          const failedDeletes: string[] = [];  // IDs que no pudieron ser eliminados
+
+          selectedIds.forEach((id) => {
+            this.apiService.delete(`${this.tableName}/${id}`, true).subscribe(
+              () => {
+                deleteCount++;  // Incrementar el contador de eliminaciones procesadas
+
+                // Actualizar la lista de elementos después de cada eliminación exitosa
+                this.data = this.data.filter(item => item.id !== id);
+                this.filteredData = [...this.data];  // Forzar la actualización de la tabla
+
+                // Si todos los IDs fueron procesados (exitosos o fallidos)
+                if (deleteCount === selectedIds.length) {
+                  // Limpiar los elementos seleccionados
+                  this.selectedItems = [];
+                  this.checkedValGet = [];
+
+                  // Cerrar la alerta de carga
+                  this.utilitiesService.showLoadingAlert('close');
+
+                  // Mostrar una alerta de éxito o alerta de mezcla de resultados
+                  if (failedDeletes.length === 0) {
+                    this.utilitiesService.showAlert('success', `Se han eliminado ${deleteCount} registros correctamente.`);
+                  } else {
+                    this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registros correctamente, pero no se pudo eliminar ${failedDeletes.length} registros, es probable que tenga registros asociados.`);
+                  }
+                }
+              },
+              (error) => {
+                deleteCount++;  // Incrementar el contador, incluso si la eliminación falló
+                failedDeletes.push(id);  // Agregar el ID fallido al array
+
+                // Si todos los IDs fueron procesados (exitosos o fallidos)
+                if (deleteCount === selectedIds.length) {
+                  // Limpiar los elementos seleccionados
+                  this.selectedItems = [];
+                  this.checkedValGet = [];
+
+                  // Cerrar la alerta de carga
+                  this.utilitiesService.showLoadingAlert('close');
+
+                  // Mostrar alerta de mezcla de resultados
+                  this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registros correctamente, pero no se pudo eliminar ${failedDeletes.length} registros, es probable que tenga registros asociados.`);
+                }
+              }
+            );
+          });
+        }
+      });
   }
 
 }

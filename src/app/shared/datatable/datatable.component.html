@@ -9,7 +9,7 @@
 
     <div class="row g-4 mb-3">
         <div class="col-sm-auto">
-            <div dropdown class="btn-group">
+            <div dropdown class="btn-group me-2">
                 <button type="button" dropdownToggle class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false"><i class="bi bi-cloud-download"></i> Exportar</button>
                 <div *dropdownMenu class="dropdown-menu">
@@ -19,6 +19,10 @@
                     <a class="dropdown-item" href="javascript:void(0);">Imprimir</a>
                 </div>
             </div>
+            <button class="btn btn-danger position-relative" [disabled]="selectedItems.length === 0" (click)="deleteSelectedItems(selectedItems)">
+                <i class="ri-delete-bin-2-line"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" *ngIf="selectedItems.length > 0">{{selectedItems.length}}</span>
+            </button>
         </div>
         <div class="col-sm">
             <div class="d-flex justify-content-sm-end">
@@ -41,6 +45,12 @@
         <table class="table align-middle table-nowrap" id="customerTable">
             <thead class="table-light">
                 <tr>
+                    <th scope="col wdth50">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkAll" [(ngModel)]="masterSelected"
+                                (change)="checkUncheckAll($event)">
+                        </div>
+                    </th>
                     <th scope="col" style="width: 50px;">#</th>
                     <th class="sort" *ngFor="let column of columns" [class.sortable-column]="column.sortable"
                         (click)="column.sortable && sortData(column.key)">{{ column.label }}
@@ -52,7 +62,13 @@
             <tbody class="list form-check-all">
 
                 <tr *ngFor="let item of paginatedData; let i = index">
-                    <th scope="row">{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</th>
+                    <td class="wdth50">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="item.isSelected"
+                                (change)="checkItemSelection(item, $event)">
+                        </div>
+                    </td>
+                    <td scope="row">{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
                     <!-- Verifica si el campo requiere el diseño personalizado -->
                     <td *ngFor="let column of columns">
                         <ng-container *ngIf="column.customField; else defaultColumn">
@@ -67,13 +83,17 @@
                     </td>
                     <td class="wdth50">
                         <div class="d-flex gap-2">
-                            <div dropdown class="btn-group">
+                            <div [ngClass]="{'dropup': isLastRecord(i)}" dropdown class="btn-group">
                                 <button type="button" dropdownToggle class="btn btn-light dropdown-toggle"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="bi bi-gear"></i></button>
-                                <div *dropdownMenu class="dropdown-menu">
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                                <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
                                     <button class="dropdown-item" *ngFor="let action of actions"
                                         (click)="isActionVisible(action, item) && action.onClick(item)"
-                                        [disabled]="!isActionVisible(action, item)">{{ action.label }}</button>
+                                        [disabled]="!isActionVisible(action, item)">
+                                        {{ action.label }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -95,7 +115,7 @@
     <!-- Paginación -->
     <div class="row align-items-center" *ngIf="filteredData.length > 0">
         <div class="col-md-6 d-flex align-items-center pagin">
-            <span class="me-2">Ir a página:</span>
+            <span class="me-2">Página:</span>
             <select class="form-select form-select w-auto" [(ngModel)]="currentPage" (change)="changePage(currentPage)">
                 <option *ngFor="let page of totalPages" [value]="page">{{ page }}</option>
             </select>
@@ -110,7 +130,8 @@
         <div class="col-md-6 d-flex justify-content-end">
 
             <div class="pagination-wrap hstack gap-2">
-                <a class="page-item pagination-prev pointer" [class.disabled]="currentPage === 1" (click)="changePage(1)">
+                <a class="page-item pagination-prev pointer" [class.disabled]="currentPage === 1"
+                    (click)="changePage(1)">
                     ««
                 </a>
                 <a class="page-item pagination-prev pointer" [class.disabled]="currentPage === 1"

@@ -38,7 +38,6 @@ export class SpeciesComponent implements OnInit {
 
   // Cargar especies desde el API
   loadSpecies(): void {
-    this.isLoading = true;
     this.apiService.get('species', true).subscribe(
       (response) => {
         if (response.success) {
@@ -89,17 +88,18 @@ export class SpeciesComponent implements OnInit {
     this.apiService.post('species', this.newSpecie, true).subscribe(
       (response) => {
         if (response.success) {
-          this.species.push(response.data);
-          this.newSpecie = { specieName: '' };
-          this.errors = {};
-          modal.close();
+          this.newSpecie = { specieName: '' };  // Limpiar el formulario
+          this.errors = {};  // Limpiar los errores
+          // Mostrar la alerta de éxito
           this.utilitiesService.showAlert('success', 'Especie agregada correctamente.');
+          // Cerrar el modal usando la referencia correcta
+          modal.hide();
           this.loadSpecies();
         }
       },
       (error) => {
         if (error.status === 422) {
-          this.errors = error.error.errors;
+          this.errors = error.error.errors;  // Manejar errores de validación
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo agregar la especie.');
         }
@@ -137,13 +137,19 @@ export class SpeciesComponent implements OnInit {
       .then((result) => {
         if (result.isConfirmed) {
           this.apiService.delete(`species/${id}`, true).subscribe(
-            (result) => {
+            () => {
               this.utilitiesService.showAlert('success', 'La especie ha sido eliminada.');
-              this.loadSpecies();
+
+              // Actualizar la lista de especies con una nueva referencia
+              this.species = this.species.filter(specie => specie.id !== id);  // Crear nueva referencia del array
+
+              // Notifica a Angular que actualice el componente de la tabla
+              this.species = [...this.species];  // Forzamos una nueva referencia para actualizar el componente
+
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la especie.';
-              this.utilitiesService.showAlert('error', errorMessage)
+              this.utilitiesService.showAlert('error', errorMessage);
             }
           );
         }

@@ -1,31 +1,68 @@
 /* Tablas Personalizadas Compacta */
-.table-responsive {
+/*.table-responsive {
     overflow: visible !important;
 }
 
 .compact-table {
     font-size: 13px;
     white-space: nowrap;
+}*/
+
+/* Estilos para el dropdown en tablas responsivas */
+.table-responsive .dropdown-menu {
+    position: absolute;
+    white-space: nowrap;
+    z-index: 1050;
+    /* Asegura que se posicione por encima de la paginación */
 }
 
-.badge {
-    padding: 0.25rem 0.5rem;
-    font-size: 10px;
+.wdth50 {
+    width: 50px;
+    min-width: 50px;
 }
 
-.btn-table .btn-xs {
-    padding: 0.3rem 0.55rem;
-    /*font-size: 10px;*/
+.dropup .dropdown-menu {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: .125rem;
+    z-index: 1050; /* Asegura que el dropdown esté por encima de otros elementos */
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dropdown-menu {
+        left: auto;
+        right: 0;
+    }
+}
+
+/* Mejora la experiencia en caso de desbordamientos o cuando hay pocos elementos en la tabla */
+.table-responsive {
+    overflow-x: visible !important; /* Permite que los dropdowns se comporten bien sin desbordarse */
+    position: relative;
+}
+
+/* Evita superposición con la paginación */
+.paginate-dropdown {
+    z-index: 1050;
+}
+
+/* Ajuste opcional para dropdown que se posicione mejor en pantallas pequeñas */
+@media (max-width: 768px) {
+    .dropup .dropdown-menu {
+        bottom: 100%;
+        margin-bottom: 0;
+        position: absolute;
+    }
 }
 
 .sortable-column {
     cursor: pointer;
     position: relative;
-}
-
-.dropdown-menu {
-    z-index: 1050;
-    position: absolute;
 }
 
 .file-hidden {

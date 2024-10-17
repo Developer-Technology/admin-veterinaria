@@ -21,6 +21,22 @@ export class UtilitiesService {
         });
     }
 
+    showLoadingAlert(status: string): void {
+        if (status === 'close') {
+            Swal.close();
+        } else {
+            Swal.fire({
+                allowOutsideClick: false,
+                icon: 'info',
+                title: 'Cargando...',
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+    }
+
     // Función para truncar texto
     truncateText(text: string, limit: number): string {
         if (text.length > limit) {
@@ -47,5 +63,7 @@ export class UtilitiesService {
             cancelButtonText: cancelButtonText
         });
     }
+
+
 
 }
