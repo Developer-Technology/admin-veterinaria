@@ -101,6 +101,10 @@ export class DatatableComponent implements OnInit {
   get showingRecords(): string {
     const start = (this.currentPage - 1) * this.itemsPerPage + 1;
     const end = Math.min(this.currentPage * this.itemsPerPage, this.filteredData.length);
+    // Si no hay resultados, se muestra "Mostrando 0 de 0 resultados"
+    if (this.filteredData.length === 0) {
+      return `Mostrando 0 de 0 resultados`;
+    }
     return `Mostrando ${start} - ${end} de ${this.filteredData.length} resultados`;
   }
 
