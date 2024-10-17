@@ -1,6 +1,9 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { UtilitiesService } from '../../services/utilities.service';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-datatable',
@@ -14,6 +17,7 @@ export class DatatableComponent implements OnInit {
   @Input() itemsPerPage: number = 5;  // Número de elementos por página
   @Input() actions: any[] = [];  // Acciones que se pueden realizar en cada fila (editar, eliminar, etc.)
   @Input() tableName: string = '';  // Nombre de la tabla (Recibido desde la vista)
+  @Input() exportName: string = '';  // Nombre de la tabla para exportar (Recibido desde la vista)
 
   currentPage: number = 1;  // Página actual
   searchQuery: string = '';  // Filtro de búsqueda
@@ -24,7 +28,6 @@ export class DatatableComponent implements OnInit {
   masterSelected: boolean = false;  // Estado del checkbox maestro
   selectedItems: any[] = [];  // Elementos seleccionados (IDs de los elementos seleccionados)
   checkedValGet: any[] = [];  // IDs de los elementos seleccionados
-
 
   constructor(
     private apiService: ApiService,
@@ -293,6 +296,57 @@ export class DatatableComponent implements OnInit {
           });
         }
       });
+  }
+
+  exportToPDF(): void {
+    // Definir la orientación del PDF basado en la cantidad de columnas
+    const orientation = this.columns.length > 5 ? 'l' : 'p';  // Si hay más de 5 columnas, usar orientación horizontal
+    const doc = new jsPDF(orientation, 'mm', 'a4');  // Ajustar orientación basado en la cantidad de columnas
+
+    // Agregar logo (opcional) - Agrega la ruta correcta al logo
+    const logo = 'assets/images/companies/img-1.png';  // Puedes agregar un logo si lo deseas
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const logoWidth = 40;  // Tamaño del logo en mm
+    const logoHeight = 15;
+
+    doc.addImage(logo, 'PNG', 10, 10, logoWidth, logoHeight);  // Agregar logo al PDF
+
+    // Título del reporte
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Reporte de Tabla de Datos ' + this.exportName + '', pageWidth / 2, 20, { align: 'center' });
+
+    // Subtítulo con fecha de generación
+    const today = formatDate(new Date(), 'dd/MM/yyyy', 'en-US');
+    doc.setFontSize(12);
+    doc.text(`Generado el: ${today}`, pageWidth / 2, 28, { align: 'center' });
+
+    // Agregar la tabla
+    const columns = this.columns.map(col => col.label);
+    const rows = this.filteredData.map(item => {
+      return this.columns.map(col => item[col.key]);
+    });
+
+    doc.setFontSize(10);
+    (doc as any).autoTable({
+      head: [columns],
+      body: rows,
+      startY: 40,  // Espacio desde la parte superior para dejar lugar al encabezado
+      theme: 'grid',  // Tema de la tabla
+      headStyles: { fillColor: [71, 87, 120], textColor: [255, 255, 255] },  // Color de encabezado
+      alternateRowStyles: { fillColor: [240, 240, 240] },  // Alternar color de filas
+      margin: { top: 30 },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 5, halign: 'center' },  // Estilos generales
+      didDrawPage: function (data: any) {  // Declarar el tipo de data como any
+        // Agregar pie de página
+        const pageSize = doc.internal.pageSize;
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+        doc.text('Página ' + doc.getNumberOfPages(), data.settings.margin.left, pageHeight - 10);  // Utilizar doc.getNumberOfPages()
+      }
+    });
+
+    // Descargar el archivo PDF
+    doc.save('Tabla_' + this.exportName + '.pdf');
   }
 
 }

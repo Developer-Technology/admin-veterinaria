@@ -21,9 +21,19 @@
                         </div>
                     </div>
 
-                    <app-datatable *ngIf="!isLoading" [columns]="[
-                        { label: 'Nombre', key: 'specieName', sortable: true }
-                      ]" [data]="species" [itemsPerPage]="5" [actions]="actions" [tableName]="'species'">
+                    <app-datatable *ngIf="!isLoading"
+                        [columns]="[
+                                        {
+                                            label: 'Nombre',
+                                            key: 'specieName',
+                                            sortable: true
+                                        }
+                                    ]"
+                        [data]="species"
+                        [itemsPerPage]="5"
+                        [actions]="actions"
+                        [tableName]="'species'"
+                        [exportName]="'Especies'">
                     </app-datatable>
 
                 </div>
