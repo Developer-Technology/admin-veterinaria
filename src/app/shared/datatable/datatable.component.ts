@@ -349,4 +349,79 @@ export class DatatableComponent implements OnInit {
     doc.save('Tabla_' + this.exportName + '.pdf');
   }
 
+  printTable(): void {
+    // Crear una nueva ventana
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+
+    if (printWindow) {
+      // Generar el contenido HTML que deseas imprimir
+      let printContent = `
+            <html>
+            <head>
+                <title>Imprimir Tabla</title>
+                <style>
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    table, th, td {
+                        border: 1px solid black;
+                    }
+                    th, td {
+                        padding: 8px;
+                        text-align: center;
+                    }
+                    th {
+                        background-color: #475778;
+                        color: white;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f2f2f2;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2 style="text-align: center;">Reporte de Tabla de Datos</h2>
+                <h4 style="text-align: center;">Generado el: ${formatDate(new Date(), 'dd/MM/yyyy', 'en-US')}</h4>
+                <table>
+                    <thead>
+                        <tr>`;
+
+      // Agregar los encabezados de la tabla
+      this.columns.forEach(col => {
+        printContent += `<th>${col.label}</th>`;
+      });
+
+      printContent += `</tr></thead><tbody>`;
+
+      // Agregar las filas de la tabla
+      this.filteredData.forEach(item => {
+        printContent += `<tr>`;
+        this.columns.forEach(col => {
+          printContent += `<td>${item[col.key]}</td>`;
+        });
+        printContent += `</tr>`;
+      });
+
+      printContent += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+      // Escribir el contenido en la ventana de impresión
+      printWindow.document.write(printContent);
+      printWindow.document.close(); // Necesario para cerrar el flujo de escritura
+
+      // Esperar un momento para que el contenido se renderice correctamente
+      setTimeout(() => {
+        printWindow.print();  // Ejecutar la función de impresión
+        printWindow.close();  // Cerrar la ventana después de la impresión
+      }, 500);
+    } else {
+      this.utilitiesService.showAlert('error', 'No se pudo abrir la ventana de impresión.');
+    }
+  }
+
 }

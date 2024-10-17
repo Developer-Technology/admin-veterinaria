@@ -14,9 +14,9 @@
                     aria-haspopup="true" aria-expanded="false"><i class="bi bi-cloud-download"></i> Exportar</button>
                 <div *dropdownMenu class="dropdown-menu">
                     <a class="dropdown-item pointer" (click)="exportToPDF()">PDF</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Excel</a>
+                    <a class="dropdown-item pointer">Excel</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="javascript:void(0);">Imprimir</a>
+                    <a class="dropdown-item pointer" (click)="printTable()">Imprimir</a>
                 </div>
             </div>
             <button class="btn btn-danger position-relative" [disabled]="selectedItems.length === 0" (click)="deleteSelectedItems(selectedItems)">
