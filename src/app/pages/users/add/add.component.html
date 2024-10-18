@@ -1,0 +1,126 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Usuarios" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Crear Nuevo Usuario</h4>
+                <p class="text-muted">Complete los siguientes campos para crear un nuevo usuario en el sistema.</p>
+            </div><!-- end card header -->
+
+            <div class="card-body">
+                <!-- Formulario para crear un nuevo usuario -->
+                <form (ngSubmit)="onSubmit()" #userForm="ngForm" class="row g-3">
+
+                    <!-- Documento -->
+                    <div class="col-md-3">
+                        <label for="doc" class="form-label">Documento</label>
+                        <input type="text" class="form-control" id="doc" [(ngModel)]="newUser.doc" name="doc" required>
+                        <div *ngIf="errors?.doc" class="text-danger small">{{ errors.doc[0] }}</div>
+                    </div>
+
+                    <!-- Nombre -->
+                    <div class="col-md-5">
+                        <label for="name" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="name" [(ngModel)]="newUser.name" name="name"
+                            required>
+                        <div *ngIf="errors?.name" class="text-danger small">{{ errors.name[0] }}</div>
+                    </div>
+
+                    <!-- Sexo -->
+                    <div class="col-md-4">
+                        <label for="sex" class="form-label">Género</label>
+                        <select class="form-select" id="sex" [(ngModel)]="newUser.sex" name="sex" required>
+                            <option value="" disabled selected>Seleccione el Género</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
+                        <div *ngIf="errors?.sex" class="text-danger small">{{ errors.sex[0] }}</div>
+                    </div>
+
+                    <!-- Correo Electrónico -->
+                    <div class="col-md-8">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="email" [(ngModel)]="newUser.email" name="email"
+                            required (input)="onEmailInput()">
+                        <div *ngIf="emailTouched && !isValidEmail(newUser.email)" class="text-danger small">El formato
+                            del correo electrónico no es válido</div>
+                        <div *ngIf="errors?.email" class="text-danger small">{{ errors.email[0] }}</div>
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="col-md-4">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="phone" [(ngModel)]="newUser.phone" name="phone"
+                            required>
+                        <div *ngIf="errors?.phone" class="text-danger small">{{ errors.phone[0] }}</div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="col-md-4">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" [(ngModel)]="newUser.password"
+                            name="password" required minlength="8" (input)="onPasswordInput()">
+                        <div *ngIf="errors?.password" class="text-danger small">{{ errors.password[0] }}</div>
+                    </div>
+
+                    <!-- Repetir Contraseña -->
+                    <div class="col-md-4">
+                        <label for="confirmPassword" class="form-label">Repetir Contraseña</label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                            [(ngModel)]="newUser.password_confirmation" name="password_confirmation" required
+                            minlength="8" (input)="onPasswordInput()">
+                        <div *ngIf="passwordMismatch" class="text-danger small">Las contraseñas no coinciden</div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="col-md-2">
+                        <label for="statusUser" class="form-label">Estado</label>
+                        <select class="form-select" id="statusUser" [(ngModel)]="newUser.status" name="status" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <!-- Privilegio -->
+                    <div class="col-md-2">
+                        <label for="privilege" class="form-label">Privilegio</label>
+                        <select class="form-select" id="privilege" [(ngModel)]="newUser.privilege" name="privilege"
+                            required>
+                            <option value="" disabled selected>Seleccione el Privilegio</option>
+                            <option value="User">Usuario</option>
+                            <option value="Admin">Administrador</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12 text-end">
+
+                        <!-- Botón para regresar a "/users" -->
+                        <button type="button" class="btn btn-dark me-2" (click)="goBack()">
+                            <i class="feather icon-arrow-left-circle"></i> Regresar
+                        </button>
+
+                        <!-- Botón para resetear el formulario -->
+                        <button type="button" class="btn btn-danger me-2" (click)="resetForm(userForm)">
+                            <i class="feather icon-refresh-cw"></i> Resetear
+                        </button>
+
+                        <!-- Botón para enviar el formulario -->
+                        <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid || passwordMismatch || isLoading">
+                            <span *ngIf="!isLoading"><i class="feather icon-check-circle"></i> Crear Usuario</span>
+                            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status"
+                                aria-hidden="true"></span>
+                            <span *ngIf="isLoading" class="sr-only"></span>
+                        </button>
+                    </div>
+
+                </form>
+            </div><!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+    <!-- end col -->
+</div>

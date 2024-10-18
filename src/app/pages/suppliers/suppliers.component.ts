@@ -32,7 +32,7 @@ export class SuppliersComponent implements OnInit {
 
   // Cargar proveedores desde el API
   loadSuppliers(): void {
-    this.isLoading = true;  // Iniciar el estado de carga
+    //this.isLoading = true;  // Iniciar el estado de carga
     this.apiService.get('suppliers', true).subscribe(
       (response) => {
         if (response.success) {
