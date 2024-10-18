@@ -159,24 +159,19 @@ export class SidebarComponent {
   activateParentDropdown(item: any) {
     item.classList.add("active");
     let parentCollapseDiv = item.closest(".collapse.menu-dropdown");
-
+  
     if (parentCollapseDiv) {
-      // to set aria expand true remaining
       parentCollapseDiv.classList.add("show");
       parentCollapseDiv.parentElement.children[0].classList.add("active");
       parentCollapseDiv.parentElement.children[0].setAttribute("aria-expanded", "true");
+  
       if (parentCollapseDiv.parentElement.closest(".collapse.menu-dropdown")) {
         parentCollapseDiv.parentElement.closest(".collapse").classList.add("show");
-        if (parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling)
+        if (parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling) {
           parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling.classList.add("active");
-        if (parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling.closest(".collapse")) {
-          parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling.closest(".collapse").classList.add("show");
-          parentCollapseDiv.parentElement.closest(".collapse").previousElementSibling.closest(".collapse").previousElementSibling.classList.add("active");
         }
       }
-      return false;
     }
-    return false;
   }
 
   updateActive(event: any) {
@@ -195,9 +190,10 @@ export class SidebarComponent {
       const items = Array.from(ul.querySelectorAll("a.nav-link"));
       let activeItems = items.filter((x: any) => x.classList.contains("active"));
       this.removeActivation(activeItems);
-
+  
+      // Buscar el menú que coincida parcialmente con el pathName
       let matchingMenuItem = items.find((x: any) => {
-        return x.pathname === pathName;
+        return pathName.startsWith(x.pathname); // Modificar para que acepte rutas como '/clients' y subrutas como '/clients/add'
       });
       if (matchingMenuItem) {
         this.activateParentDropdown(matchingMenuItem);
