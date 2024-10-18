@@ -84,11 +84,10 @@ export class SpeciesComponent implements OnInit {
   }
 
   // Abrir modal para editar especie
-  // Abrir modal para editar especie
   openEditModal(specie: any): void {
-    this.selectedSpecie = { ...specie }; // Asigna la especie seleccionada a selectedSpecie
+    this.selectedSpecie = { ...specie }; // Crea una copia del objeto specie
     this.errors = {}; // Limpia los errores anteriores
-    this.modalRef = this.modalService.show(this.editModal);  // Abre el modal usando la referencia correcta
+    this.modalRef = this.modalService.show(this.editModal);
   }
 
   // Enviar formulario para agregar una nueva especie
@@ -119,7 +118,7 @@ export class SpeciesComponent implements OnInit {
   }
 
   // Enviar formulario para editar una especie existente
-  onEditSubmit(modal: any): void {
+  onEditSubmit(): void {
     this.apiService.put(`species/${this.selectedSpecie.id}`, this.selectedSpecie, true).subscribe(
       (response) => {
         if (response.success) {
@@ -127,7 +126,7 @@ export class SpeciesComponent implements OnInit {
           if (index !== -1) {
             this.species[index] = response.data;
           }
-          modal.close();
+          this.modalRef?.hide(); // Esto cerrará el modal
           this.utilitiesService.showAlert('success', 'Especie actualizada correctamente.');
           this.loadSpecies();
         }

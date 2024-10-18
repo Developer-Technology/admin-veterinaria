@@ -39,12 +39,12 @@
     <!-- end col -->
 </div>
 
-<div bsModal #addModal="bs-modal" id="myModal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel"
+<div bsModal #addModal="bs-modal" id="addModal" class="modal fade" tabindex="-1" aria-labelledby="addModal"
     aria-hidden="true" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Agregar Especie</h5>
+                <h5 class="modal-title" id="addModal">Agregar Especie</h5>
                 <button type="button" class="btn-close" (click)="addModal.hide()"></button>
             </div>
             <form (ngSubmit)="onSubmit(addModal)">
@@ -70,31 +70,24 @@
     </div><!-- /.modal-dialog -->
 </div>
 
-<div bsModal #editModal="bs-modal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Editar Especie</h5>
-                <button type="button" class="btn-close" (click)="editModal.hide()"></button>
-            </div>
-            <form (ngSubmit)="onEditSubmit(editModal)">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="specieName" class="form-label">Nombre de la Especie</label>
-                        <input type="text" class="form-control" [(ngModel)]="selectedSpecie.specieName"
-                            name="specieName" required>
-                        <div *ngIf="errors?.specieName" class="text-danger small">{{ errors.specieName[0] }}</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" (click)="editModal.hide()">Cerrar</button>
-                    <button type="submit" class="btn btn-primary" [disabled]="isLoadingBtn">
-                        <span *ngIf="!isLoadingBtn">Actualizar</span>
-                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                    </button>
-                </div>
-            </form>
-        </div>
+<ng-template #editModal class="modal fade" tabindex="-1" aria-labelledby="addModal" aria-hidden="true"
+    style="display: none;">
+    <div class="modal-header">
+        <h5 class="modal-title">Editar Especie</h5>
+        <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
     </div>
-</div>
+    <form (ngSubmit)="onEditSubmit()">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="specieName" class="form-label">Nombre de la Especie</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedSpecie.specieName" name="specieName"
+                    required>
+                <div *ngIf="errors?.specieName" class="text-danger small">{{ errors.specieName[0] }}</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-light" (click)="modalRef?.hide()">Cerrar</button>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+    </form>
+</ng-template>
