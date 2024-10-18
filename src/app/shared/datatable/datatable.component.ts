@@ -48,7 +48,7 @@ export class DatatableComponent implements OnInit {
 
   ngOnInit(): void {
     this.filteredData = this.data;  // Inicializar con todos los datos
-    this.visibleColumns = [...this.columns];  // Inicializar con todas las columnas visibles por defecto
+    this.visibleColumns = this.columns.filter(col => col.label !== 'Acciones' && col.label !== 'Seleccionar');  // Iniciar con todas las columnas visibles excepto las que no exportamos
   }
 
   // Función para manejar la búsqueda
@@ -301,9 +301,25 @@ export class DatatableComponent implements OnInit {
       });
   }
 
+  // Verificar si hay columnas seleccionadas
+  validateColumnSelection(): boolean {
+    return this.visibleColumns.length > 0;
+  }
+
+  // Mostrar alerta si no hay columnas seleccionadas
+  showNoColumnSelectedAlert(): void {
+    this.utilitiesService.showAlert('warning', 'Debe seleccionar al menos una columna para exportar o imprimir.');
+  }
+
   exportToPDF(): void {
+
+    if (!this.validateColumnSelection()) {
+      this.showNoColumnSelectedAlert();
+      return;
+    }
+
     // Definir la orientación del PDF basado en la cantidad de columnas
-    const orientation = this.columns.length > 5 ? 'l' : 'p';  // Si hay más de 5 columnas, usar orientación horizontal
+    const orientation = this.visibleColumns.length > 5 ? 'l' : 'p';  // Si hay más de 5 columnas, usar orientación horizontal
     const doc = new jsPDF(orientation, 'mm', 'a4');  // Ajustar orientación basado en la cantidad de columnas
 
     // Agregar logo (opcional) - Agrega la ruta correcta al logo
@@ -325,9 +341,9 @@ export class DatatableComponent implements OnInit {
     doc.text(`Generado el: ${today}`, pageWidth / 2, 28, { align: 'center' });
 
     // Agregar la tabla
-    const columns = this.columns.map(col => col.label);
+    const columns = this.visibleColumns.map(col => col.label);
     const rows = this.filteredData.map(item => {
-      return this.columns.map(col => item[col.key]);
+      return this.visibleColumns.map(col => item[col.key]);
     });
 
     doc.setFontSize(10);
@@ -353,6 +369,12 @@ export class DatatableComponent implements OnInit {
   }
 
   printTable(): void {
+
+    if (!this.validateColumnSelection()) {
+      this.showNoColumnSelectedAlert();
+      return;
+    }
+
     // Crear una nueva ventana
     const printWindow = window.open('', '_blank', 'width=800,height=600');
 
@@ -391,7 +413,7 @@ export class DatatableComponent implements OnInit {
                         <tr>`;
 
       // Agregar los encabezados de la tabla
-      this.columns.forEach(col => {
+      this.visibleColumns.forEach(col => {
         printContent += `<th>${col.label}</th>`;
       });
 
@@ -400,7 +422,7 @@ export class DatatableComponent implements OnInit {
       // Agregar las filas de la tabla
       this.filteredData.forEach(item => {
         printContent += `<tr>`;
-        this.columns.forEach(col => {
+        this.visibleColumns.forEach(col => {
           printContent += `<td>${item[col.key]}</td>`;
         });
         printContent += `</tr>`;
@@ -428,9 +450,15 @@ export class DatatableComponent implements OnInit {
   }
 
   exportToExcel(): void {
+
+    if (!this.validateColumnSelection()) {
+      this.showNoColumnSelectedAlert();
+      return;
+    }
+
     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.filteredData.map(item => {
       const row: any = {};
-      this.columns.forEach(col => {
+      this.visibleColumns.forEach(col => {
         row[col.label] = item[col.key];  // Mapea las columnas y filas de datos
       });
       return row;
