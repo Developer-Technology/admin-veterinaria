@@ -1,0 +1,104 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Razas" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Gestión de Razas</h4>
+                <button class="btn btn-primary" (click)="addModal.show()">
+                    <i class="bi bi-plus-circle-dotted"></i> Agregar Raza
+                </button>
+            </div><!-- end card header -->
+
+            <div class="card-body">
+                <div id="customerList">
+
+                    <div *ngIf="isLoading" class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div>
+                    </div>
+
+                    <app-datatable *ngIf="!isLoading" [columns]="[
+                    { label: 'Nombre', key: 'breedName', sortable: true },
+                    { label: 'Especie', key: 'specieName', sortable: true }
+                    ]" [data]="breeds" [itemsPerPage]="5" [actions]="actions" [tableName]="'breeds'"
+                        [exportName]="'Razas'">
+                    </app-datatable>
+
+                </div>
+            </div><!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+    <!-- end col -->
+</div>
+
+<div bsModal #addModal="bs-modal" id="addModal" class="modal fade" tabindex="-1" aria-labelledby="addModal"
+    aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModal">Agregar Raza</h5>
+                <button type="button" class="btn-close" (click)="addModal.hide()"></button>
+            </div>
+            <form (ngSubmit)="onSubmit(addModal)">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="breedName" class="form-label">Nombre de la Raza</label>
+                        <input type="text" class="form-control" [(ngModel)]="newBreed.breedName" name="breedName"
+                            required>
+                        <div *ngIf="errors?.breedName" class="text-danger small">{{ errors.breedName[0] }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="species" class="form-label">Especie</label>
+                        <ng-select [items]="species" bindLabel="specieName" bindValue="id"
+                            placeholder="Seleccione la especie" [(ngModel)]="newBreed.species_id" name="species_id"
+                            required>
+                        </ng-select>
+                        <div *ngIf="errors?.species_id" class="text-danger small">{{ errors.species_id[0] }}</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="addModal.hide()">Cerrar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || isLoadingBtn">
+                        <span *ngIf="!isLoadingBtn">Agregar</span>
+                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isLoadingBtn" class="sr-only"></span>
+                    </button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<ng-template #editModal class="modal fade" tabindex="-1" aria-labelledby="addModal" aria-hidden="true"
+    style="display: none;">
+    <div class="modal-header">
+        <h5 class="modal-title">Editar Raza</h5>
+        <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+    </div>
+    <form (ngSubmit)="onEditSubmit()">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="breedName" class="form-label">Nombre de la Raza</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedBreed.breedName" name="breedName" required>
+                <div *ngIf="errors?.breedName" class="text-danger small">{{ errors.breedName[0] }}</div>
+            </div>
+            <div class="mb-3">
+                <label for="species_id" class="form-label">Especie</label>
+                <ng-select [items]="species" bindLabel="specieName" bindValue="id" placeholder="Seleccione la especie"
+                    [(ngModel)]="selectedBreed.species_id" name="species_id" required>
+                </ng-select>
+                <div *ngIf="errors.species_id" class="text-danger small">{{ errors.species_id }}</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-light" (click)="modalRef?.hide()">Cerrar</button>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+    </form>
+</ng-template>

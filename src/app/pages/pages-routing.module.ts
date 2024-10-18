@@ -8,7 +8,9 @@ const routes: Routes = [
   {
     path: 'species', loadChildren: () => import('./species/species.module').then(m => m.SpeciesModule)
   },
-
+  {
+    path: 'breeds', loadChildren: () => import('./breeds/breeds.module').then(m => m.BreedsModule)
+  },
 ];
 
 @NgModule({
