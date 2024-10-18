@@ -9,6 +9,21 @@
 
     <div class="row g-4 mb-3">
         <div class="col-sm-auto">
+            <div dropdown class="btn-group me-2">
+                <button type="button" dropdownToggle class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false"><i class="bi bi-eye"></i> Columnas</button>
+                <div *dropdownMenu class="dropdown-menu">
+                    <div class="form-check" *ngFor="let column of columns; let i = index">
+                        <div class="dropdown-item">
+                            <!-- El input tiene un id único basado en el índice 'i' -->
+                            <input class="form-check-input" type="checkbox" [id]="'checkbox-' + i"
+                                [checked]="isColumnVisible(column)" (change)="toggleColumnVisibility(column)">
+                            <!-- El label tiene un for que coincide con el id del input -->
+                            <label class="form-check-label" [for]="'checkbox-' + i">{{ column.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div dropdown class="btn-group me-2" *ngIf="exportName">
                 <button type="button" dropdownToggle class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false"><i class="bi bi-cloud-download"></i> Exportar</button>
@@ -19,9 +34,11 @@
                     <a class="dropdown-item pointer" (click)="printTable()">Imprimir</a>
                 </div>
             </div>
-            <button class="btn btn-danger position-relative" [disabled]="selectedItems.length === 0" (click)="deleteSelectedItems(selectedItems)">
+            <button class="btn btn-danger position-relative" [disabled]="selectedItems.length === 0"
+                (click)="deleteSelectedItems(selectedItems)">
                 <i class="ri-delete-bin-2-line"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" *ngIf="selectedItems.length > 0">{{selectedItems.length}}</span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning"
+                    *ngIf="selectedItems.length > 0">{{selectedItems.length}}</span>
             </button>
         </div>
         <div class="col-sm">
@@ -52,7 +69,7 @@
                         </div>
                     </th>
                     <th scope="col" style="width: 50px;">#</th>
-                    <th class="sort" *ngFor="let column of columns" [class.sortable-column]="column.sortable"
+                    <th class="sort" *ngFor="let column of visibleColumns" [class.sortable-column]="column.sortable"
                         (click)="column.sortable && sortData(column.key)">{{ column.label }}
                         <i *ngIf="column.sortable" [ngClass]="getSortIcon(column.key)"></i>
                     </th>
@@ -60,7 +77,6 @@
                 </tr>
             </thead>
             <tbody class="list form-check-all">
-
                 <tr *ngFor="let item of paginatedData; let i = index">
                     <td class="wdth50">
                         <div class="form-check">
@@ -69,10 +85,8 @@
                         </div>
                     </td>
                     <td scope="row">{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
-                    <!-- Verifica si el campo requiere el diseño personalizado -->
-                    <td *ngFor="let column of columns">
+                    <td *ngFor="let column of visibleColumns">
                         <ng-container *ngIf="column.customField; else defaultColumn">
-                            <!-- Aquí usamos el nuevo componente 'custom-field' -->
                             <app-custom-field [imageUrl]="serverUrl + item[column.imageKey]"
                                 [title]="item[column.titleKey]" [subtitle]="item[column.subtitleKey]">
                             </app-custom-field>

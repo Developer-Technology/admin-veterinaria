@@ -29,6 +29,7 @@ export class DatatableComponent implements OnInit {
   masterSelected: boolean = false;  // Estado del checkbox maestro
   selectedItems: any[] = [];  // Elementos seleccionados (IDs de los elementos seleccionados)
   checkedValGet: any[] = [];  // IDs de los elementos seleccionados
+  visibleColumns: any[] = []; // Array para gestionar las columnas visibles
 
   constructor(
     private apiService: ApiService,
@@ -47,6 +48,7 @@ export class DatatableComponent implements OnInit {
 
   ngOnInit(): void {
     this.filteredData = this.data;  // Inicializar con todos los datos
+    this.visibleColumns = [...this.columns];  // Inicializar con todas las columnas visibles por defecto
   }
 
   // Función para manejar la búsqueda
@@ -441,6 +443,20 @@ export class DatatableComponent implements OnInit {
     // Exportar como archivo Excel
     const fileName = `reporte_${this.exportName}_${new Date().getTime()}.xlsx`;  // Nombre dinámico para el archivo
     XLSX.writeFile(wb, fileName);
+  }
+
+  toggleColumnVisibility(column: any): void {
+    const index = this.visibleColumns.indexOf(column);
+    if (index > -1) {
+      this.visibleColumns.splice(index, 1);  // Remover columna si está visible
+    } else {
+      this.visibleColumns.push(column);  // Agregar columna si está oculta
+    }
+  }
+
+  // Verifica si la columna es visible
+  isColumnVisible(column: any): boolean {
+    return this.visibleColumns.includes(column);
   }
 
 }
