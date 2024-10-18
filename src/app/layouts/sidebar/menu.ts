@@ -29,6 +29,12 @@ export const MENU: MenuItem[] = [
                 label: 'Razas',
                 link: '/breeds',
                 parentId: 3
+            },
+            {
+                id: 6,
+                label: 'Vacunas',
+                link: '/vaccines',
+                parentId: 3
             }
         ]
     },

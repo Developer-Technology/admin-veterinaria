@@ -4,22 +4,22 @@ import { UtilitiesService } from '../../services/utilities.service';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
-  selector: 'app-breeds',
-  templateUrl: './breeds.component.html',
-  styleUrls: ['./breeds.component.scss']
+  selector: 'app-vaccines',
+  templateUrl: './vaccines.component.html',
+  styleUrls: ['./vaccines.component.scss']
 })
-export class BreedsComponent implements OnInit {
+export class VaccinesComponent implements OnInit {
 
   @ViewChild('editModal') editModal!: TemplateRef<any>;
   breadCrumbItems!: Array<{}>;
   isDropup = true;
   modalRef?: BsModalRef;
-  breeds: any[] = [];  // Lista completa de razas
+  vaccines: any[] = [];  // Lista completa de vacunas
   species: any[] = [];  // Lista de especies para el select
   isLoading: boolean = true;  // Estado de carga
   actions: any[] = [];  // Acciones que se pueden realizar en la tabla
-  newBreed: any = { breedName: '', species_id: null };  // Objeto para la nueva raza
-  selectedBreed: any = { id: null, breedName: '', species_id: null };  // Raza seleccionada para editar
+  newVaccine: any = { vaccineName: '', species_id: null };  // Objeto para la nueva vacuna
+  selectedVaccine: any = { id: null, vaccineName: '', species_id: null };  // Vacuna seleccionada para editar
   errors: any = {};  // Errores de validación
   isLoadingBtn: boolean = false;
 
@@ -32,33 +32,33 @@ export class BreedsComponent implements OnInit {
   ngOnInit(): void {
     this.breadCrumbItems = [
       { label: 'Dashboard', link: '/' },
-      { label: 'Razas', active: true }
+      { label: 'Vacunas', active: true }
     ];
-    this.loadBreeds();
+    this.loadVaccines();
     this.loadSpecies();
     this.setupActions();
   }
 
   // Valida si el formulario es válido (ambos campos con algún valor)
   isFormValid(): boolean {
-    return this.newBreed.breedName.trim() !== '';
+    return this.newVaccine.vaccineName.trim() !== '' && this.newVaccine.species_id !== null;
   }
 
-  // Cargar razas desde el API
-  loadBreeds(): void {
+  // Cargar vacunas desde el API
+  loadVaccines(): void {
     //this.isLoading = true;
-    this.apiService.get('breeds', true).subscribe(
+    this.apiService.get('vaccines', true).subscribe(
       (response) => {
         if (response.success) {
-          this.breeds = response.data
-            .filter((breed: any) => breed.breedName)  // Filtrar razas válidas
+          this.vaccines = response.data
+            .filter((vaccine: any) => vaccine.vaccineName)  // Filtrar vacunas válidas
             .sort((a: any, b: any) => b.id - a.id);  // Ordenar descendente por 'id'
           this.isLoading = false;
         }
       },
       () => {
         this.isLoading = false;
-        this.utilitiesService.showAlert('error', 'No se pudieron cargar las razas');
+        this.utilitiesService.showAlert('error', 'No se pudieron cargar las vacunas');
       }
     );
   }
@@ -80,73 +80,74 @@ export class BreedsComponent implements OnInit {
     this.actions = [
       {
         label: 'Editar',
-        onClick: (breed: any) => this.openEditModal(breed),
-        condition: (breed: any) => true  // Todas las filas pueden ser editadas
+        onClick: (vaccine: any) => this.openEditModal(vaccine),
+        condition: (vaccine: any) => true  // Todas las filas pueden ser editadas
       },
       {
         label: 'Eliminar',
-        onClick: (breed: any) => this.deleteBreed(breed.id), // Pasamos solo el ID correctamente
-        condition: (breed: any) => true  // Todas las filas pueden ser eliminadas
+        onClick: (vaccine: any) => this.deleteVaccine(vaccine.id), // Pasamos solo el ID correctamente
+        condition: (vaccine: any) => true  // Todas las filas pueden ser eliminadas
       }
     ];
   }
 
   openAddModal(addModal: TemplateRef<any>) {
-    this.newBreed = { breedName: '' };
+    this.newVaccine = { vaccineName: '', species_id: null };
     this.errors = {};
     this.modalRef = this.modalService.show(addModal);
   }
 
-  // Abrir modal para editar raza
-  openEditModal(breed: any): void {
-    this.selectedBreed = { ...breed }; // Crea una copia del objeto breed
+  // Abrir modal para editar vacuna
+  openEditModal(vaccine: any): void {
+    this.selectedVaccine = { ...vaccine }; // Crea una copia del objeto vaccine
     this.errors = {}; // Limpia los errores anteriores
     this.modalRef = this.modalService.show(this.editModal);
   }
 
-  // Enviar formulario para agregar una nueva raza
+  // Enviar formulario para agregar una nueva vacuna
   onSubmit(modal: any): void {
     if (!this.isFormValid()) return;
     this.isLoadingBtn = true;
-    this.apiService.post('breeds', this.newBreed, true).subscribe(
+    this.apiService.post('vaccines', this.newVaccine, true).subscribe(
       (response) => {
         if (response.success) {
-          this.newBreed = { breedName: '' };  // Limpiar el formulario
+          this.newVaccine = { vaccineName: '', species_id: null };  // Limpiar el formulario
           this.errors = {};  // Limpiar los errores
           // Mostrar la alerta de éxito
-          this.utilitiesService.showAlert('success', 'Raza agregada correctamente.');
+          this.utilitiesService.showAlert('success', 'Vacuna agregada correctamente.');
           // Cerrar el modal usando la referencia correcta
           this.isLoadingBtn = false;
           modal.hide();
-          this.loadBreeds();
+          this.loadVaccines();
         }
       },
       (error) => {
+        this.isLoadingBtn = false;
         if (error.status === 422) {
           this.errors = error.error.errors;  // Manejar errores de validación
           this.isLoadingBtn = false;
         } else {
-          this.utilitiesService.showAlert('error', 'No se pudo agregar la raza.');
+          this.utilitiesService.showAlert('error', 'No se pudo agregar la vacuna.');
           this.isLoadingBtn = false;
         }
       }
     );
   }
 
-  // Enviar formulario para editar una raza existente
+  // Enviar formulario para editar una vacuna existente
   onEditSubmit(): void {
     this.isLoadingBtn = true;
-    this.apiService.put(`breeds/${this.selectedBreed.id}`, this.selectedBreed, true).subscribe(
+    this.apiService.put(`vaccines/${this.selectedVaccine.id}`, this.selectedVaccine, true).subscribe(
       (response) => {
         if (response.success) {
-          const index = this.breeds.findIndex(b => b.id === this.selectedBreed.id);
+          const index = this.vaccines.findIndex(v => v.id === this.selectedVaccine.id);
           if (index !== -1) {
-            this.breeds[index] = response.data;
+            this.vaccines[index] = response.data;
           }
           this.modalRef?.hide(); // Esto cerrará el modal
-          this.utilitiesService.showAlert('success', 'Raza actualizada correctamente.');
+          this.utilitiesService.showAlert('success', 'Vacuna actualizada correctamente.');
           this.isLoadingBtn = false;
-          this.loadBreeds();
+          this.loadVaccines();
         }
       },
       (error) => {
@@ -154,31 +155,31 @@ export class BreedsComponent implements OnInit {
           this.errors = error.error.errors;
           this.isLoadingBtn = false;
         } else {
-          this.utilitiesService.showAlert('error', 'No se pudo actualizar la raza.');
+          this.utilitiesService.showAlert('error', 'No se pudo actualizar la vacuna.');
           this.isLoadingBtn = false;
         }
       }
     );
   }
 
-  // Eliminar una raza y actualizar la tabla
-  deleteBreed(id: string): void {
+  // Eliminar una vacuna y actualizar la tabla
+  deleteVaccine(id: string): void {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
-          this.apiService.delete(`breeds/${id}`, true).subscribe(
+          this.apiService.delete(`vaccines/${id}`, true).subscribe(
             () => {
-              this.utilitiesService.showAlert('success', 'La raza ha sido eliminada.');
+              this.utilitiesService.showAlert('success', 'La vacuna ha sido eliminada.');
 
-              // Actualizar la lista de razas con una nueva referencia
-              this.breeds = this.breeds.filter(breed => breed.id !== id);  // Crear nueva referencia del array
+              // Actualizar la lista de vacunas con una nueva referencia
+              this.vaccines = this.vaccines.filter(vaccine => vaccine.id !== id);  // Crear nueva referencia del array
 
               // Notifica a Angular que actualice el componente de la tabla
-              this.breeds = [...this.breeds];  // Forzamos una nueva referencia para actualizar el componente
+              this.vaccines = [...this.vaccines];  // Forzamos una nueva referencia para actualizar el componente
 
             },
             (error) => {
-              const errorMessage = error?.error?.message || 'No se pudo eliminar la raza.';
+              const errorMessage = error?.error?.message || 'No se pudo eliminar la vacuna.';
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );

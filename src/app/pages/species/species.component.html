@@ -87,7 +87,12 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-light" (click)="modalRef?.hide()">Cerrar</button>
-            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isLoadingBtn">
+                <span *ngIf="!isLoadingBtn">Actualizar</span>
+                <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+                <span *ngIf="isLoadingBtn" class="sr-only"></span>
+            </button>
         </div>
     </form>
 </ng-template>

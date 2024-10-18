@@ -110,8 +110,10 @@ export class SpeciesComponent implements OnInit {
       (error) => {
         if (error.status === 422) {
           this.errors = error.error.errors;  // Manejar errores de validación
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo agregar la especie.');
+          this.isLoadingBtn = false;
         }
       }
     );
@@ -119,6 +121,7 @@ export class SpeciesComponent implements OnInit {
 
   // Enviar formulario para editar una especie existente
   onEditSubmit(): void {
+    this.isLoadingBtn = true;
     this.apiService.put(`species/${this.selectedSpecie.id}`, this.selectedSpecie, true).subscribe(
       (response) => {
         if (response.success) {
@@ -128,14 +131,17 @@ export class SpeciesComponent implements OnInit {
           }
           this.modalRef?.hide(); // Esto cerrará el modal
           this.utilitiesService.showAlert('success', 'Especie actualizada correctamente.');
+          this.isLoadingBtn = false;
           this.loadSpecies();
         }
       },
       (error) => {
         if (error.status === 422) {
           this.errors = error.error.errors;
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo actualizar la especie.');
+          this.isLoadingBtn = false;
         }
       }
     );

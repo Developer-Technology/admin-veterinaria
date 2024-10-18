@@ -1,14 +1,14 @@
 <!-- Start Breadcrumbs -->
-<app-breadcrumbs title="Razas" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<app-breadcrumbs title="Vacunas" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
 <!-- End Breadcrumbs -->
 
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">Gestión de Razas</h4>
+                <h4 class="card-title mb-0">Gestión de Vacunas</h4>
                 <button class="btn btn-primary" (click)="addModal.show()">
-                    <i class="bi bi-plus-circle-dotted"></i> Agregar Raza
+                    <i class="bi bi-plus-circle-dotted"></i> Agregar Vacuna
                 </button>
             </div><!-- end card header -->
 
@@ -22,10 +22,10 @@
                     </div>
 
                     <app-datatable *ngIf="!isLoading" [columns]="[
-                    { label: 'Nombre', key: 'breedName', sortable: true },
+                    { label: 'Nombre', key: 'vaccineName', sortable: true },
                     { label: 'Especie', key: 'specieName', sortable: true }
-                    ]" [data]="breeds" [itemsPerPage]="5" [actions]="actions" [tableName]="'breeds'"
-                        [exportName]="'Razas'">
+                    ]" [data]="vaccines" [itemsPerPage]="5" [actions]="actions" [tableName]="'vaccines'"
+                        [exportName]="'Vacunas'">
                     </app-datatable>
 
                 </div>
@@ -41,21 +41,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addModal">Agregar Raza</h5>
+                <h5 class="modal-title" id="addModal">Agregar Vacuna</h5>
                 <button type="button" class="btn-close" (click)="addModal.hide()"></button>
             </div>
             <form (ngSubmit)="onSubmit(addModal)">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="breedName" class="form-label">Nombre de la Raza</label>
-                        <input type="text" class="form-control" [(ngModel)]="newBreed.breedName" name="breedName"
+                        <label for="vaccineName" class="form-label">Nombre de la Vacuna</label>
+                        <input type="text" class="form-control" [(ngModel)]="newVaccine.vaccineName" name="vaccineName"
                             required>
-                        <div *ngIf="errors?.breedName" class="text-danger small">{{ errors.breedName[0] }}</div>
+                        <div *ngIf="errors?.vaccineName" class="text-danger small">{{ errors.vaccineName[0] }}</div>
                     </div>
                     <div class="mb-3">
                         <label for="species" class="form-label">Especie</label>
                         <ng-select [items]="species" bindLabel="specieName" bindValue="id"
-                            placeholder="Seleccione la especie" [(ngModel)]="newBreed.species_id" name="species_id"
+                            placeholder="Seleccione la especie" [(ngModel)]="newVaccine.species_id" name="species_id"
                             required>
                         </ng-select>
                         <div *ngIf="errors?.species_id" class="text-danger small">{{ errors.species_id[0] }}</div>
@@ -78,20 +78,20 @@
 <ng-template #editModal class="modal fade" tabindex="-1" aria-labelledby="addModal" aria-hidden="true"
     style="display: none;">
     <div class="modal-header">
-        <h5 class="modal-title">Editar Raza</h5>
+        <h5 class="modal-title">Editar Vacuna</h5>
         <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
     </div>
     <form (ngSubmit)="onEditSubmit()">
         <div class="modal-body">
             <div class="mb-3">
-                <label for="breedName" class="form-label">Nombre de la Raza</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedBreed.breedName" name="breedName" required>
-                <div *ngIf="errors?.breedName" class="text-danger small">{{ errors.breedName[0] }}</div>
+                <label for="vaccineName" class="form-label">Nombre de la Vacuna</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedVaccine.vaccineName" name="vaccineName" required>
+                <div *ngIf="errors?.vaccineName" class="text-danger small">{{ errors.vaccineName[0] }}</div>
             </div>
             <div class="mb-3">
                 <label for="species_id" class="form-label">Especie</label>
                 <ng-select [items]="species" bindLabel="specieName" bindValue="id" placeholder="Seleccione la especie"
-                    [(ngModel)]="selectedBreed.species_id" name="species_id" required>
+                    [(ngModel)]="selectedVaccine.species_id" name="species_id" required>
                 </ng-select>
                 <div *ngIf="errors.species_id" class="text-danger small">{{ errors.species_id }}</div>
             </div>
