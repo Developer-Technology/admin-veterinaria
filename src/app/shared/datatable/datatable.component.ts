@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { UtilitiesService } from '../../services/utilities.service';
+import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatDate } from '@angular/common';
@@ -346,7 +347,7 @@ export class DatatableComponent implements OnInit {
     });
 
     // Descargar el archivo PDF
-    doc.save('Tabla_' + this.exportName + '.pdf');
+    doc.save('Tabla_' + this.exportName + '_' + new Date().getTime() + '.pdf');
   }
 
   printTable(): void {
@@ -422,6 +423,24 @@ export class DatatableComponent implements OnInit {
     } else {
       this.utilitiesService.showAlert('error', 'No se pudo abrir la ventana de impresión.');
     }
+  }
+
+  exportToExcel(): void {
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.filteredData.map(item => {
+      const row: any = {};
+      this.columns.forEach(col => {
+        row[col.label] = item[col.key];  // Mapea las columnas y filas de datos
+      });
+      return row;
+    }));
+
+    // Crear libro de trabajo
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'DatosTabla');
+
+    // Exportar como archivo Excel
+    const fileName = `reporte_${this.exportName}_${new Date().getTime()}.xlsx`;  // Nombre dinámico para el archivo
+    XLSX.writeFile(wb, fileName);
   }
 
 }
