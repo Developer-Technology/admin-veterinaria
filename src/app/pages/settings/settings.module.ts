@@ -5,6 +5,7 @@ import { SettingsComponent } from './settings.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { RouterModule, Routes } from '@angular/router';
 import { AngularCropperjsModule } from 'angular-cropperjs';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 // Definir la ruta para el componente SettingsComponent
 const routes: Routes = [
@@ -20,7 +21,8 @@ const routes: Routes = [
     FormsModule,
     RouterModule.forChild(routes),
     AngularCropperjsModule,
-    SharedModule
+    SharedModule,
+    ModalModule
   ]
 })
 export class SettingsModule { }

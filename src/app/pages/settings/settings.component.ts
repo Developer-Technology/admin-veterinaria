@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { UtilitiesService } from '../../services/utilities.service';
-import { CropperComponent } from 'angular-cropperjs';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-settings',
@@ -12,6 +12,7 @@ export class SettingsComponent implements OnInit {
 
   @ViewChild('cropper', { static: false }) cropper: any;
   breadCrumbItems!: Array<{}>;
+  modalRef?: BsModalRef;
   editCompany: any = {
     companyDoc: '',
     companyName: '',
@@ -44,7 +45,8 @@ export class SettingsComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private utilitiesService: UtilitiesService
+    private utilitiesService: UtilitiesService,
+    private modalService: BsModalService,
   ) {
     this.serverUrl = this.apiService.getServerUrl();
   }
@@ -59,7 +61,7 @@ export class SettingsComponent implements OnInit {
 
   // Cargar datos de la empresa
   loadCompany(): void {
-    this.isLoading = true;
+    //this.isLoading = true;
     this.apiService.get('companies/1', true).subscribe(
       (response) => {
         if (response.success) {
@@ -101,6 +103,7 @@ export class SettingsComponent implements OnInit {
   // Función para recortar la imagen
   cropImage(): void {
     this.croppedImage = this.cropper.cropper.getCroppedCanvas().toDataURL();
+    //this.editCompany.companyPhoto = this.croppedImage;
   }
 
   // Convertir la imagen base64 en un archivo
@@ -135,7 +138,7 @@ export class SettingsComponent implements OnInit {
           const imageFile = this.base64ToFile(this.croppedImage as string, `${this.editCompany.companyName}.png`);
           this.uploadPhoto(imageFile);  // Subir la imagen después de actualizar la empresa
         }
-
+        this.loadCompany();
         this.isLoadingBtn = false;
       },
       (error) => {
@@ -170,6 +173,11 @@ export class SettingsComponent implements OnInit {
   resetForm(form: any): void {
     form.reset();
     this.ngOnInit(); // Volver a cargar los datos originales
+  }
+
+  //Abre modal Crop
+  openCropModal(cropModal: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(cropModal);
   }
 
 }
