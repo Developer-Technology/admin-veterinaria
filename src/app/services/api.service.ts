@@ -36,7 +36,7 @@ export class ApiService {
 
   // Método POST genérico con cabeceras (token opcional)
   post(endpoint: string, data: any, authenticated: boolean = true): Observable<any> {
-    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    let headers = new HttpHeaders();
     if (authenticated) {
       const token = this.getToken();
       if (token) {

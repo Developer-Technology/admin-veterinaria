@@ -1,12 +1,175 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ApiService } from '../../services/api.service';
+import { UtilitiesService } from '../../services/utilities.service';
+import { CropperComponent } from 'angular-cropperjs';
 
 @Component({
   selector: 'app-settings',
-  standalone: true,
-  imports: [],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.scss'
+  styleUrls: ['./settings.component.scss']
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
+
+  @ViewChild('cropper', { static: false }) cropper: any;
+  breadCrumbItems!: Array<{}>;
+  editCompany: any = {
+    companyDoc: '',
+    companyName: '',
+    companyAddress: '',
+    companyPhone: '',
+    companyEmail: '',
+    companyPhoto: '',
+    companyCurrency: '',
+    companyTax: '',
+  };
+
+  //company: any = null;
+  errors: any = {};
+  imageUrl: string = 'assets/images/default/40084.png';
+  croppedImage: string | ArrayBuffer | null = ''; // Almacena la imagen recortada en base64
+  serverUrl: string;
+  isLoading: boolean = true;
+  isLoadingBtn: boolean = false;
+
+  config = {
+    aspectRatio: 400 / 84,  // Relación de aspecto 4.76 para un recorte de 400x84
+    movable: true,
+    zoomable: true,
+    scalable: true,
+    autoCropArea: 1,  // Asegura que el área de recorte ocupe el espacio completo al cargar
+    viewMode: 1,  // Asegura que el recorte permanezca dentro de los límites de la imagen
+    cropBoxResizable: true,  // Permitir ajustar el tamaño del cuadro de recorte
+    cropBoxMovable: true  // Permitir mover el cuadro de recorte
+  };
+
+  constructor(
+    private apiService: ApiService,
+    private utilitiesService: UtilitiesService
+  ) {
+    this.serverUrl = this.apiService.getServerUrl();
+  }
+
+  ngOnInit(): void {
+    this.breadCrumbItems = [
+      { label: 'Dashboard', link: '/' },
+      { label: 'Empresa', active: true }
+    ];
+    this.loadCompany();
+  }
+
+  // Cargar datos de la empresa
+  loadCompany(): void {
+    this.isLoading = true;
+    this.apiService.get('companies/1', true).subscribe(
+      (response) => {
+        if (response.success) {
+          this.editCompany = response.data;
+          // Construir la URL completa de la imagen de la mascota si existe
+          this.imageUrl = this.editCompany.companyPhoto
+            ? `${this.serverUrl}${this.editCompany.companyPhoto}`
+            : 'assets/images/default/40084.png';  // Imagen por defecto si no tiene
+          this.isLoading = false;
+        }
+      },
+      (error) => {
+        this.utilitiesService.showAlert('error', 'No se pudieron cargar los datos de la empresa.');
+      }
+    );
+  }
+
+  handleFileInput(event: any) {
+    if (event.target.files.length) {
+      const fileTypes = ['jpg', 'jpeg', 'png'];
+      const extension = event.target.files[0].name.split('.').pop().toLowerCase();
+      const isSuccess = fileTypes.indexOf(extension) > -1;
+
+      if (isSuccess) {
+        const reader = new FileReader();
+        const angularCropper = this.cropper;
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            angularCropper.imageUrl = event.target.result;
+          }
+        };
+        reader.readAsDataURL(event.target.files[0]);
+      } else {
+        this.utilitiesService.showAlert('warning', 'Por favor, selecciona un archivo de imagen válido (jpg, jpeg o png).');
+      }
+    }
+  }
+
+  // Función para recortar la imagen
+  cropImage(): void {
+    this.croppedImage = this.cropper.cropper.getCroppedCanvas().toDataURL();
+  }
+
+  // Convertir la imagen base64 en un archivo
+  base64ToFile(dataURI: string, filename: string): File {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new File([ab], filename, { type: mimeString });
+  }
+
+  // Enviar el formulario de edición
+  onUpdate(): void {
+    this.isLoadingBtn = true;
+
+    // Limpiar companyPhoto para evitar enviar el base64 al backend
+    const companyPhotoBackup = this.editCompany.companyPhoto; // Hacer backup si es necesario para mostrarla en el frontend
+    this.editCompany.companyPhoto = null; // Eliminar el valor base64
+
+    this.apiService.put('companies/1', this.editCompany, true).subscribe(
+      (response) => {
+        this.utilitiesService.showAlert('success', 'Empresa actualizada correctamente.');
+
+        // Restaurar la imagen para mostrarla nuevamente en el frontend
+        this.editCompany.companyPhoto = companyPhotoBackup;
+
+        // Subir la imagen solo si ha sido recortada
+        if (this.croppedImage) {
+          const imageFile = this.base64ToFile(this.croppedImage as string, `${this.editCompany.companyName}.png`);
+          this.uploadPhoto(imageFile);  // Subir la imagen después de actualizar la empresa
+        }
+
+        this.isLoadingBtn = false;
+      },
+      (error) => {
+        this.utilitiesService.showAlert('error', 'No se pudo actualizar la empresa.');
+        this.isLoadingBtn = false;
+      }
+    );
+  }
+
+  // Función para subir la imagen
+  uploadPhoto(imageFile: File): void {
+    const imageData = new FormData();
+    imageData.append('companyPhoto', imageFile);
+  
+    // Verificar que el archivo esté presente
+    console.log('Archivo enviado:', imageFile);
+  
+    this.apiService.post(`companies/1/upload`, imageData, true).subscribe(
+      (response) => {
+        if (response.success) {
+          this.utilitiesService.showAlert('success', response.message);
+          this.imageUrl = `${this.serverUrl}${response.data}`;
+        }
+      },
+      (error) => {
+        this.utilitiesService.showAlert('error', 'No se pudo subir la imagen');
+      }
+    );
+  }
+
+  // Función para resetear el formulario
+  resetForm(form: any): void {
+    form.reset();
+    this.ngOnInit(); // Volver a cargar los datos originales
+  }
 
 }

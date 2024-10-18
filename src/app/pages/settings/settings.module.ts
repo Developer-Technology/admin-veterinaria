@@ -1,14 +1,26 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SettingsComponent } from './settings.component';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { RouterModule, Routes } from '@angular/router';
+import { AngularCropperjsModule } from 'angular-cropperjs';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-
+// Definir la ruta para el componente SettingsComponent
+const routes: Routes = [
+  { path: '', component: SettingsComponent }
+];
 
 @NgModule({
-  declarations: [],
+  declarations: [
+    SettingsComponent
+  ],
   imports: [
     CommonModule,
-    SettingsRoutingModule
+    FormsModule,
+    RouterModule.forChild(routes),
+    AngularCropperjsModule,
+    SharedModule
   ]
 })
 export class SettingsModule { }
