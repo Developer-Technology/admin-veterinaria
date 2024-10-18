@@ -166,8 +166,10 @@ export class BreedsComponent implements OnInit {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`breeds/${id}`, true).subscribe(
             () => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'La raza ha sido eliminada.');
 
               // Actualizar la lista de razas con una nueva referencia
@@ -179,6 +181,7 @@ export class BreedsComponent implements OnInit {
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la raza.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );

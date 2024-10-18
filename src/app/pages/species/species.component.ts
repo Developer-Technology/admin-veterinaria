@@ -152,8 +152,10 @@ export class SpeciesComponent implements OnInit {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`species/${id}`, true).subscribe(
             () => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'La especie ha sido eliminada.');
 
               // Actualizar la lista de especies con una nueva referencia
@@ -165,6 +167,7 @@ export class SpeciesComponent implements OnInit {
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la especie.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );

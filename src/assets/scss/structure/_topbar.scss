@@ -35,7 +35,7 @@
     left: 0;
     right: 0;
     top: 0;
-    background-color: $header-bg;
+    background-color: /*$header-bg*/ rgba(90, 88, 235, 0.08);
     height: 170px;
 }
 
@@ -101,14 +101,14 @@
         padding-left: 40px;
         padding-right: 30px;
         transition: all 0.5s ease;
-        background-color: $header-bg;
+        background-color: /*$header-bg*/ rgba(90, 88, 235, 0.08);
         border-color: $header-border-color;
         color: $header-item-color;
 
         &:hover,
         &:focus,
         &:active {
-            background-color: $header-bg;
+            background-color: /*$header-bg*/ rgba(90, 88, 235, 0.08);
         }
     }
 

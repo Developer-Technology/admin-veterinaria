@@ -167,8 +167,10 @@ export class VaccinesComponent implements OnInit {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`vaccines/${id}`, true).subscribe(
             () => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'La vacuna ha sido eliminada.');
 
               // Actualizar la lista de vacunas con una nueva referencia
@@ -180,6 +182,7 @@ export class VaccinesComponent implements OnInit {
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la vacuna.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );
