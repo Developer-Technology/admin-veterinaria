@@ -34,7 +34,7 @@
                     <a class="dropdown-item pointer" (click)="printTable()">Imprimir</a>
                 </div>
             </div>
-            <button class="btn btn-danger position-relative" [disabled]="selectedItems.length === 0"
+            <button class="btn btn-danger position-relative me-2" [disabled]="selectedItems.length === 0"
                 (click)="deleteSelectedItems(selectedItems)">
                 <i class="ri-delete-bin-2-line"></i>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning"
@@ -56,6 +56,13 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
         <p class="mb-0 text-muted small"><strong>{{ totalRecords }}</strong></p>
         <p class="mb-0 text-muted small"><strong>{{ showingRecords }}</strong></p>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div *ngIf="isLoadingTable" class="loading-overlay">
+        <div class="spinner-border text-info" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
     </div>
 
     <div class="table-responsive table-card mt-3 mb-1">
@@ -139,10 +146,12 @@
                 <option [value]="5">5</option>
                 <option [value]="10">10</option>
                 <option [value]="20">20</option>
+                <option [value]="30">30</option>
+                <option [value]="40">40</option>
+                <option [value]="50">50</option>
             </select>
         </div>
         <div class="col-md-6 d-flex justify-content-end">
-
             <div class="pagination-wrap hstack gap-2">
                 <a class="page-item pagination-prev pointer" [class.disabled]="currentPage === 1"
                     (click)="changePage(1)">
@@ -167,28 +176,6 @@
                     (click)="changePage(totalPages.length)">
                     »»
                 </a>
-
-                <!--<nav>
-                    <ul class="pagination pagination-sm justify-content-end">
-                        <li class="page-item" [class.disabled]="currentPage === 1">
-                            <a class="page-link" (click)="changePage(1)">««</a>
-                        </li>
-                        <li class="page-item" [class.disabled]="currentPage === 1">
-                            <a class="page-link" (click)="changePage(currentPage - 1)">«</a>
-                        </li>
-                        <li *ngFor="let page of compactTotalPages" class="page-item"
-                            [class.active]="currentPage === page" [class.disabled]="page === -1">
-                            <a *ngIf="page !== -1" class="page-link" (click)="changePage(page)">{{ page }}</a>
-                            <span *ngIf="page === -1" class="page-link">...</span>
-                        </li>
-                        <li class="page-item" [class.disabled]="currentPage === totalPages.length">
-                            <a class="page-link" (click)="changePage(currentPage + 1)">»</a>
-                        </li>
-                        <li class="page-item" [class.disabled]="currentPage === totalPages.length">
-                            <a class="page-link" (click)="changePage(totalPages.length)">»»</a>
-                        </li>
-                    </ul>
-                </nav>-->
             </div>
         </div>
     </div>

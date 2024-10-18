@@ -25,7 +25,8 @@
     top: auto;
     bottom: 100%;
     margin-bottom: .125rem;
-    z-index: 1050; /* Asegura que el dropdown esté por encima de otros elementos */
+    z-index: 1050;
+    /* Asegura que el dropdown esté por encima de otros elementos */
 }
 
 @media (max-width: 768px) {
@@ -42,7 +43,8 @@
 
 /* Mejora la experiencia en caso de desbordamientos o cuando hay pocos elementos en la tabla */
 .table-responsive {
-    overflow-x: visible !important; /* Permite que los dropdowns se comporten bien sin desbordarse */
+    overflow-x: visible !important;
+    /* Permite que los dropdowns se comporten bien sin desbordarse */
     position: relative;
 }
 
@@ -103,4 +105,17 @@
 .img-th-card {
     width: auto;
     margin-top: 15px;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
 }

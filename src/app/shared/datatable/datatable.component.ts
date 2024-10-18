@@ -30,6 +30,7 @@ export class DatatableComponent implements OnInit {
   selectedItems: any[] = [];  // Elementos seleccionados (IDs de los elementos seleccionados)
   checkedValGet: any[] = [];  // IDs de los elementos seleccionados
   visibleColumns: any[] = []; // Array para gestionar las columnas visibles
+  isLoadingTable = false;  // Indicador de carga
 
   constructor(
     private apiService: ApiService,
@@ -244,7 +245,7 @@ export class DatatableComponent implements OnInit {
       return;
     }
 
-    this.utilitiesService.showConfirmationDelet('¿Estás seguro?', 'Se eliminarán ' + selectedIds.length + ' registros. ¡Esta acción no se puede deshacer!')
+    this.utilitiesService.showConfirmationDelet('¿Estás seguro?', 'Se eliminará(n) ' + selectedIds.length + ' registro(s). ¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
           this.utilitiesService.showLoadingAlert('');
@@ -272,9 +273,9 @@ export class DatatableComponent implements OnInit {
 
                   // Mostrar una alerta de éxito o alerta de mezcla de resultados
                   if (failedDeletes.length === 0) {
-                    this.utilitiesService.showAlert('success', `Se han eliminado ${deleteCount} registros correctamente.`);
+                    this.utilitiesService.showAlert('success', `Se han eliminado ${deleteCount} registro(s) correctamente.`);
                   } else {
-                    this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registros correctamente, pero no se pudo eliminar ${failedDeletes.length} registros, es probable que tenga registros asociados.`);
+                    this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registro(s) correctamente, pero no se pudo eliminar ${failedDeletes.length} registro(s), es probable que tenga registro(s) asociado(s).`);
                   }
                 }
               },
@@ -292,7 +293,7 @@ export class DatatableComponent implements OnInit {
                   this.utilitiesService.showLoadingAlert('close');
 
                   // Mostrar alerta de mezcla de resultados
-                  this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registros correctamente, pero no se pudo eliminar ${failedDeletes.length} registros, es probable que tenga registros asociados.`);
+                  this.utilitiesService.showAlert('warning', `Se eliminaron ${deleteCount - failedDeletes.length} registro(s) correctamente, pero no se pudo eliminar ${failedDeletes.length} registro(s), es probable que tenga registro(s) asociado(s).`);
                 }
               }
             );

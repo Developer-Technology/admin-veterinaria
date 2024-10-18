@@ -18,8 +18,9 @@ export class SpeciesComponent implements OnInit {
   isLoading: boolean = true;  // Estado de carga
   actions: any[] = [];  // Acciones que se pueden realizar en la tabla
   newSpecie: any = { specieName: '' };  // Objeto para la nueva especie
-  selectedSpecie: any = null;  // Especie seleccionada para editar
+  selectedSpecie: any = { id: null, specieName: '' };  // Especie seleccionada para editar
   errors: any = {};  // Errores de validación
+  isLoadingBtn: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -36,8 +37,14 @@ export class SpeciesComponent implements OnInit {
     this.setupActions();
   }
 
+  // Valida si el formulario es válido (ambos campos con algún valor)
+  isFormValid(): boolean {
+    return this.newSpecie.specieName.trim() !== '';
+  }
+
   // Cargar especies desde el API
   loadSpecies(): void {
+    //this.isLoading = true;
     this.apiService.get('species', true).subscribe(
       (response) => {
         if (response.success) {
@@ -77,14 +84,17 @@ export class SpeciesComponent implements OnInit {
   }
 
   // Abrir modal para editar especie
+  // Abrir modal para editar especie
   openEditModal(specie: any): void {
-    this.selectedSpecie = { ...specie };
-    this.errors = {};
-    //this.modalService.open(this.editModal);  // Abrir modal de edición
+    this.selectedSpecie = { ...specie }; // Asigna la especie seleccionada a selectedSpecie
+    this.errors = {}; // Limpia los errores anteriores
+    this.modalRef = this.modalService.show(this.editModal);  // Abre el modal usando la referencia correcta
   }
 
   // Enviar formulario para agregar una nueva especie
   onSubmit(modal: any): void {
+    if (!this.isFormValid()) return;
+    this.isLoadingBtn = true;
     this.apiService.post('species', this.newSpecie, true).subscribe(
       (response) => {
         if (response.success) {
@@ -93,6 +103,7 @@ export class SpeciesComponent implements OnInit {
           // Mostrar la alerta de éxito
           this.utilitiesService.showAlert('success', 'Especie agregada correctamente.');
           // Cerrar el modal usando la referencia correcta
+          this.isLoadingBtn = false;
           modal.hide();
           this.loadSpecies();
         }
