@@ -137,6 +137,8 @@ export class SettingsComponent implements OnInit {
         if (this.croppedImage) {
           const imageFile = this.base64ToFile(this.croppedImage as string, `${this.editCompany.companyName}.png`);
           this.uploadPhoto(imageFile);  // Subir la imagen
+          this.editCompany.companyPhoto;
+          this.resetCrop();
         }
         this.loadCompany();
         this.isLoadingBtn = false;
@@ -173,12 +175,23 @@ export class SettingsComponent implements OnInit {
   // Función para resetear el formulario
   resetForm(form: any): void {
     form.reset();
+    this.resetCrop();
     this.ngOnInit(); // Volver a cargar los datos originales
   }
 
   //Abre modal Crop
   openCropModal(cropModal: TemplateRef<any>) {
     this.modalRef = this.modalService.show(cropModal, this.configModal);
+  }
+
+  //Resetear Crop
+  resetCrop(): void {
+    if (this.cropper) {
+      // Restablecer la URL de la imagen al valor original
+      this.cropper.imageUrl = this.imageUrl;
+      // Vaciar la imagen recortada, ya que se está reiniciando
+      this.croppedImage = '';
+    }
   }
 
 }

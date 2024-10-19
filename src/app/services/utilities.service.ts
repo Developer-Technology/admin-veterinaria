@@ -64,6 +64,13 @@ export class UtilitiesService {
         });
     }
 
-
+    // Función para convertir una fecha al formato 'yyyy-MM-dd'
+    formatToDateString(date: any): string {
+        if (date) {
+            const selectedDate = typeof date === 'string' ? new Date(date) : date;
+            return selectedDate.toISOString().split('T')[0];
+        }
+        return '';
+    }
 
 }

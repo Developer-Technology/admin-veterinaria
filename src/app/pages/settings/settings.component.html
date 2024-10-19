@@ -98,8 +98,14 @@
                         <div class="col-md-12 text-center">
                             <label class="form-label">Logo de la Empresa</label>
                             <img [src]="editCompany.companyPhoto ? serverUrl + editCompany.companyPhoto : 'assets/images/default/40084.png'"
-                                class="img-fluid">
-                            <div class="btn btn-light mt-3" (click)="cropModal.show()">Buscar logo</div>
+                                class="img-fluid" *ngIf="editCompany.companyPhoto">
+                            <img [src]="'assets/images/default/40084.png'" class="img-fluid"
+                                *ngIf="!editCompany.companyPhoto">
+                            <img *ngIf="croppedImage" [src]="croppedImage" class="img-fluid mt-2">
+                            <div class="btn btn-light mt-3 me-2" (click)="cropModal.show()"><i class="bi bi-search"></i>
+                                Buscar</div>
+                            <button [disabled]="!croppedImage" class="btn btn-warning mt-3" (click)="resetCrop()"><i
+                                    class="ri-refresh-line"></i></button>
                         </div>
                     </div>
 
@@ -127,8 +133,8 @@
 </div>
 
 <!-- Modal Crop -->
-<div bsModal #cropModal="bs-modal" [config]="configModal" id="cropModal" class="modal fade" tabindex="-1" aria-labelledby="cropModal"
-    aria-hidden="true" style="display: none;">
+<div bsModal #cropModal="bs-modal" [config]="configModal" id="cropModal" class="modal fade" tabindex="-1"
+    aria-labelledby="cropModal" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -137,7 +143,6 @@
             </div>
             <div class="modal-body">
                 <angular-cropper #cropper [cropperOptions]="config" [imageUrl]="imageUrl"></angular-cropper>
-                <img *ngIf="croppedImage" [src]="croppedImage" alt="Imagen Recortada" class="img-fluid mt-3" style="max-width: 100%;">
             </div>
             <div class="modal-footer">
                 <div class="">
@@ -146,7 +151,8 @@
                         class="file-hidden">
                 </div>
                 <div class="">
-                    <div *ngIf="imageUrl" class="btn btn-primary mt-3 btn-wd-100" (click)="cropImage()">
+                    <div *ngIf="imageUrl" class="btn btn-primary mt-3 btn-wd-100"
+                        (click)="cropImage(); cropModal.hide()">
                         Aceptar</div>
                 </div>
             </div>

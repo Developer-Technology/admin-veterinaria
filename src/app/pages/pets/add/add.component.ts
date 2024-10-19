@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { UtilitiesService } from '../../../services/utilities.service';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
+import { BsModalService, BsModalRef, ModalOptions } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-add',
@@ -17,6 +18,7 @@ export class AddComponent implements OnInit {
   colorTheme: any = 'theme-blue';
   bsConfig?: Partial<BsDatepickerConfig>;
   breadCrumbItems!: Array<{}>;
+  modalRef?: BsModalRef;
   newPet: any = {
     petName: '',
     petWeight: '',
@@ -35,6 +37,7 @@ export class AddComponent implements OnInit {
   errors: any = {}; // Para manejar errores del backend
   imageUrl: string = 'assets/images/default/blank-photo.png';  // Vista previa de la imagen antes del recorte
   croppedImage: string | ArrayBuffer | null = '';  // Imagen recortada
+  serverUrl: string;
 
   config = {
     aspectRatio: 1, // Recorte cuadrado
@@ -44,12 +47,19 @@ export class AddComponent implements OnInit {
     autoCropArea: 1,
   };
 
+  configModal: ModalOptions = {
+    backdrop: 'static', // Esto evita cerrar al hacer clic fuera de la ventana modal
+    keyboard: false // Esto desactiva cerrar con la tecla ESC
+  };
+
   constructor(
     private apiService: ApiService,
     private router: Router,
     private utilitiesService: UtilitiesService,
-    private datePipe: DatePipe
-  ) { }
+    private modalService: BsModalService,
+  ) {
+    this.serverUrl = this.apiService.getServerUrl();
+  }
 
   ngOnInit(): void {
     this.breadCrumbItems = [
@@ -104,14 +114,9 @@ export class AddComponent implements OnInit {
 
   // Enviar el formulario con la imagen
   onSubmit(): void {
-    
+
     if (this.newPet.petBirthDate) {
-      const selectedDate = typeof this.newPet.petBirthDate === 'string'
-        ? new Date(this.newPet.petBirthDate)
-        : this.newPet.petBirthDate;
-    
-      // Formatear la fecha manualmente a 'yyyy-MM-dd'
-      this.newPet.petBirthDate = selectedDate.toISOString().split('T')[0];
+      this.newPet.petBirthDate = this.utilitiesService.formatToDateString(this.newPet.petBirthDate);
     }
 
     const registrationDate = new Date();
@@ -143,8 +148,6 @@ export class AddComponent implements OnInit {
     if (this.croppedImage) {
       const imageFile = this.base64ToFile(this.croppedImage as string, `${this.newPet.petName}.png`);
       formData.append('petPhoto', imageFile);
-    } else {
-      formData.append('petPhoto', this.imageUrl);
     }
 
     // Enviar el formulario junto con la imagen
@@ -197,6 +200,7 @@ export class AddComponent implements OnInit {
       clients_id: null
     };
     this.errors = {};
+    this.resetCrop();
   }
 
   // Método para regresar a "/pets"
@@ -220,6 +224,7 @@ export class AddComponent implements OnInit {
 
   // Cargar razas según la especie seleccionada
   loadBreedsBySpecies(): void {
+    this.newPet.breeds_id = null;
     if (this.newPet.species_id) {
       this.apiService.get(`breeds?species_id=${this.newPet.species_id}`, true).subscribe(
         (response) => {
@@ -246,6 +251,21 @@ export class AddComponent implements OnInit {
         this.utilitiesService.showAlert('error', 'No se pudieron cargar los clientes');
       }
     );
+  }
+
+  //Abre modal Crop
+  openCropModal(cropModal: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(cropModal, this.configModal);
+  }
+
+  //Resetear Crop
+  resetCrop(): void {
+    if (this.cropper) {
+      // Restablecer la URL de la imagen al valor original
+      this.cropper.imageUrl = this.imageUrl;
+      // Vaciar la imagen recortada, ya que se está reiniciando
+      this.croppedImage = '';
+    }
   }
 
 }
