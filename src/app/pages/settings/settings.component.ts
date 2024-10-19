@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { UtilitiesService } from '../../services/utilities.service';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService, BsModalRef, ModalOptions } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-settings',
@@ -41,6 +41,11 @@ export class SettingsComponent implements OnInit {
     viewMode: 1,  // Asegura que el recorte permanezca dentro de los límites de la imagen
     cropBoxResizable: true,  // Permitir ajustar el tamaño del cuadro de recorte
     cropBoxMovable: true  // Permitir mover el cuadro de recorte
+  };
+
+  configModal: ModalOptions = {
+    backdrop: 'static', // Esto evita cerrar al hacer clic fuera de la ventana modal
+    keyboard: false // Esto desactiva cerrar con la tecla ESC
   };
 
   constructor(
@@ -96,6 +101,7 @@ export class SettingsComponent implements OnInit {
         reader.readAsDataURL(event.target.files[0]);
       } else {
         this.utilitiesService.showAlert('warning', 'Por favor, selecciona un archivo de imagen válido (jpg, jpeg o png).');
+        //alert('Por favor, selecciona un archivo de imagen válido (jpg, jpeg o png).');
       }
     }
   }
@@ -104,6 +110,9 @@ export class SettingsComponent implements OnInit {
   cropImage(): void {
     this.croppedImage = this.cropper.cropper.getCroppedCanvas().toDataURL();
     //this.editCompany.companyPhoto = this.croppedImage;
+
+    // Verifica si la imagen recortada es correcta
+    //console.log('Imagen recortada:', this.croppedImage);
   }
 
   // Convertir la imagen base64 en un archivo
@@ -121,29 +130,25 @@ export class SettingsComponent implements OnInit {
   // Enviar el formulario de edición
   onUpdate(): void {
     this.isLoadingBtn = true;
-
-    // Limpiar companyPhoto para evitar enviar el base64 al backend
-    const companyPhotoBackup = this.editCompany.companyPhoto; // Hacer backup si es necesario para mostrarla en el frontend
-    this.editCompany.companyPhoto = null; // Eliminar el valor base64
-
     this.apiService.put('companies/1', this.editCompany, true).subscribe(
       (response) => {
         this.utilitiesService.showAlert('success', 'Empresa actualizada correctamente.');
-
-        // Restaurar la imagen para mostrarla nuevamente en el frontend
-        this.editCompany.companyPhoto = companyPhotoBackup;
-
-        // Subir la imagen solo si ha sido recortada
+        // Si la imagen fue modificada, hacemos la segunda solicitud
         if (this.croppedImage) {
           const imageFile = this.base64ToFile(this.croppedImage as string, `${this.editCompany.companyName}.png`);
-          this.uploadPhoto(imageFile);  // Subir la imagen después de actualizar la empresa
+          this.uploadPhoto(imageFile);  // Subir la imagen
         }
         this.loadCompany();
         this.isLoadingBtn = false;
       },
       (error) => {
-        this.utilitiesService.showAlert('error', 'No se pudo actualizar la empresa.');
-        this.isLoadingBtn = false;
+        if (error.status === 422) {
+          this.errors = error.error.errors;
+          this.isLoadingBtn = false;
+        } else {
+          this.utilitiesService.showAlert('error', 'No se pudo actualizar la empresa.');
+          this.isLoadingBtn = false;
+        }
       }
     );
   }
@@ -152,15 +157,11 @@ export class SettingsComponent implements OnInit {
   uploadPhoto(imageFile: File): void {
     const imageData = new FormData();
     imageData.append('companyPhoto', imageFile);
-  
-    // Verificar que el archivo esté presente
-    console.log('Archivo enviado:', imageFile);
-  
+
     this.apiService.post(`companies/1/upload`, imageData, true).subscribe(
       (response) => {
         if (response.success) {
           this.utilitiesService.showAlert('success', response.message);
-          this.imageUrl = `${this.serverUrl}${response.data}`;
         }
       },
       (error) => {
@@ -177,7 +178,7 @@ export class SettingsComponent implements OnInit {
 
   //Abre modal Crop
   openCropModal(cropModal: TemplateRef<any>) {
-    this.modalRef = this.modalService.show(cropModal);
+    this.modalRef = this.modalService.show(cropModal, this.configModal);
   }
 
 }
