@@ -49,20 +49,32 @@
                                 <h6 class="text-overflow fs-sm text-muted mb-1 text-uppercase">Resultados de Búsqueda
                                 </h6>
                             </div>
-
-                            <!-- Iterar sobre los resultados de búsqueda -->
-                            <div *ngFor="let pet of searchResults" class="dropdown-item bg-transparent text-wrap">
-                                <a href="javascript:void(0);" class="dropdown-item notify-item py-2"
-                                    (click)="goToPetProfile(pet.id)">
-                                    <div class="d-flex">
-                                        <div class="flex-grow-1">
-                                            <h6 class="fs-md m-0">{{ pet.petName }}</h6>
-                                            <span class="fs-sm mb-0 text-muted">Código: {{ pet.petCode }}</span>
+                            <div *ngIf="searchResults && searchResults.length > 0">
+                                <!-- Iterar sobre los resultados de búsqueda -->
+                                <div *ngFor="let pet of searchResults" class="dropdown-item bg-transparent text-wrap">
+                                    <a href="javascript:void(0);" class="dropdown-item notify-item py-2"
+                                        (click)="goToPetProfile(pet.id)">
+                                        <div class="d-flex align-items-center">
+                                            <img [src]="pet.petPhoto ? serverUrl + pet.petPhoto : 'assets/images/default/blank-photo.png'"
+                                                class="rounded avatar-sm" style="margin-right: 10px;">
+                                            <div>
+                                                <strong>{{ pet.petName }}</strong>
+                                                <br>
+                                                <small>Código: {{ pet.petCode }}</small>
+                                            </div>
                                         </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                </div>
+                            </div>
+                            <div *ngIf="searchResults && searchResults.length === 0"
+                                class="dropdown-item bg-transparent text-wrap">
+                                No se encontraron resultados.
                             </div>
                         </ngx-simplebar>
+                        <div class="text-center pt-3 pb-1">
+                            <a href="javascript:void(0);" (click)="viewAll()" class="btn btn-primary btn-sm">Ver Todos
+                                <i class="ri-arrow-right-line ms-1"></i></a>
+                        </div>
                     </div>
                 </form>
             </div>

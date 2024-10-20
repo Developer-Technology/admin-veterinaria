@@ -62,6 +62,7 @@ export class TopbarComponent implements OnInit {
   // Buscador
   searchResults: any[] = [];
   searchTerm$ = new Subject<string>();
+  serverUrl: string;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -72,7 +73,9 @@ export class TopbarComponent implements OnInit {
     private userService: UserService,
     private apiService: ApiService,
     private utilitiesService: UtilitiesService
-  ) { }
+  ) {
+    this.serverUrl = this.apiService.getServerUrl();
+  }
 
   ngOnInit(): void {
 
@@ -229,7 +232,7 @@ export class TopbarComponent implements OnInit {
             this.showSearchDropdown(response.data.length > 0);
           } else {
             this.searchResults = [];
-            this.showSearchDropdown(false);
+            this.showSearchDropdown(response.data.length === 0);
           }
         },
         (error) => {
@@ -262,6 +265,12 @@ export class TopbarComponent implements OnInit {
   goToPetProfile(petId: string): void {
     const encodedId = btoa(petId);
     this.router.navigate(['/pets/view', encodedId]);
+    this.closeBtn();
+  }
+
+  // Función para navegar al perfil de la mascota al seleccionar un resultado
+  viewAll(): void {
+    this.router.navigate(['/pets']);
     this.closeBtn();
   }
 
