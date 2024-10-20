@@ -83,14 +83,18 @@ export class ViewComponent implements OnInit {
       { label: 'Mascotas', link: '/pets' },
       { label: 'Perfil', active: true }
     ];
-    const encodedId = this.route.snapshot.paramMap.get('id');
-    if (encodedId) {
-      const decodedId = atob(encodedId);  // Decodificar el ID
-      this.loadPet(decodedId);
-      this.loadNotes(decodedId);
-      this.loadHistories(decodedId);
-      this.setupActions();
-    }
+
+    // Suscribirse a los cambios de parámetros de la ruta
+    this.route.paramMap.subscribe((params) => {
+      const encodedId = params.get('id');
+      if (encodedId) {
+        const decodedId = atob(encodedId);  // Decodificar el ID
+        this.loadPet(decodedId);            // Cargar la nueva mascota
+        this.loadNotes(decodedId);
+        this.loadHistories(decodedId);
+        this.setupActions();
+      }
+    });
   }
 
   // Función para cargar la información de la mascota desde la API

@@ -1,5 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, EventEmitter, Inject, Output, ViewChild, OnInit } from '@angular/core';
+import { ApiService } from '../../services/api.service';
+import { UtilitiesService } from '../../services/utilities.service';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from 'src/app/core/services/language.service';
@@ -10,7 +12,8 @@ import { RootReducerState, getLayoutMode } from 'src/app/store/reducers';
 import { Store } from '@ngrx/store';
 import { changeMode } from 'src/app/store/actions/layout-action';
 import { UserService } from '../../services/user.service';
-import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-topbar',
@@ -56,12 +59,20 @@ export class TopbarComponent implements OnInit {
   @ViewChild('removeCartModal', { static: false }) removeCartModal?: ModalDirective;
   deleteid: any;
 
-  constructor(@Inject(DOCUMENT) private document: any,
+  // Buscador
+  searchResults: any[] = [];
+  searchTerm$ = new Subject<string>();
+
+  constructor(
+    @Inject(DOCUMENT) private document: any,
     public languageService: LanguageService,
     private router: Router,
     private store: Store<RootReducerState>,
     public _cookiesService: CookieService,
-    private userService: UserService) { }
+    private userService: UserService,
+    private apiService: ApiService,
+    private utilitiesService: UtilitiesService
+  ) { }
 
   ngOnInit(): void {
 
@@ -99,6 +110,7 @@ export class TopbarComponent implements OnInit {
         this.readNotify = element.items.length
       }
     });
+
   }
 
   /***
@@ -199,55 +211,71 @@ export class TopbarComponent implements OnInit {
     }
   }
 
-  // Search Topbar
-  Search() {
-    var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
-    var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
-    var input: any, filter: any, ul: any, li: any, a: any | undefined, i: any, txtValue: any;
-    input = document.getElementById("search-options") as HTMLAreaElement;
-    filter = input.value.toUpperCase();
-    var inputLength = filter.length;
+  // Buscador funcional
+  Search(): void {
+    const input = document.getElementById('search-options') as HTMLInputElement;
+    const searchOptions = document.getElementById('search-close-options') as HTMLElement;
+    const dropdown = document.getElementById('search-dropdown') as HTMLElement;
 
-    if (inputLength > 0) {
-      dropdown.classList.add("show");
-      searchOptions.classList.remove("d-none");
-      var inputVal = input.value.toUpperCase();
-      var notifyItem = document.getElementsByClassName("notify-item");
+    const filter = input.value.trim();
+    const inputLength = filter.length;
 
-      Array.from(notifyItem).forEach(function (element: any) {
-        var notifiTxt = ''
-        if (element.querySelector("h6")) {
-          var spantext = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-          var name = element.querySelector("h6").innerText.toLowerCase()
-          if (name.includes(inputVal)) {
-            notifiTxt = name
+    if (inputLength >= 3) {
+      // Ejecutar la búsqueda solo si el input tiene al menos 3 caracteres
+      this.apiService.get(`pets?query=${filter}`, true).subscribe(
+        (response) => {
+          if (response.success) {
+            this.searchResults = response.data;
+            this.showSearchDropdown(response.data.length > 0);
           } else {
-            notifiTxt = spantext
+            this.searchResults = [];
+            this.showSearchDropdown(false);
           }
-        } else if (element.getElementsByTagName("span")) {
-          notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
+        },
+        (error) => {
+          this.searchResults = [];
+          this.showSearchDropdown(false);
+          this.utilitiesService.showAlert('error', 'No se pudieron cargar las mascotas');
         }
-        if (notifiTxt)
-          element.style.display = notifiTxt.includes(inputVal) ? "block" : "none";
+      );
 
-      });
+      searchOptions.classList.remove('d-none');
     } else {
-      dropdown.classList.remove("show");
-      searchOptions.classList.add("d-none");
+      // Si el input tiene menos de 3 caracteres, cerrar el dropdown y ocultar la X de búsqueda
+      this.showSearchDropdown(false);
+      searchOptions.classList.add('d-none');
+      this.searchResults = [];
     }
   }
 
-  /**
-   * Search Close Btn
-   */
-  closeBtn() {
-    var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
-    var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
+  // Mostrar u ocultar el dropdown con resultados de búsqueda
+  private showSearchDropdown(show: boolean): void {
+    const dropdown = document.getElementById('search-dropdown') as HTMLElement;
+    if (show) {
+      dropdown.classList.add('show');
+    } else {
+      dropdown.classList.remove('show');
+    }
+  }
+
+  // Función para navegar al perfil de la mascota al seleccionar un resultado
+  goToPetProfile(petId: string): void {
+    const encodedId = btoa(petId);
+    this.router.navigate(['/pets/view', encodedId]);
+    this.closeBtn();
+  }
+
+  closeBtn(): void {
+    this.searchResults = [];
+    this.showSearchDropdown(false);
+    const searchOptions = document.getElementById(
+      'search-close-options'
+    ) as HTMLElement;
+    searchOptions.classList.add('d-none');
     var searchInputReponsive = document.getElementById("search-options") as HTMLInputElement;
-    dropdown.classList.remove("show");
-    searchOptions.classList.add("d-none");
     searchInputReponsive.value = "";
   }
+
 
   // Increment Decrement Quantity
   qty: number = 0;
@@ -347,6 +375,5 @@ export class TopbarComponent implements OnInit {
       this.router.navigate(['/auth/login']);
     }
   }
-
 
 }
