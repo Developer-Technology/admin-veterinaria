@@ -32,6 +32,10 @@ const routes: Routes = [
   {
     path: 'settings', loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },
+  //Historias
+  {
+    path: 'histories', loadChildren: () => import('./histories/histories.module').then(m => m.HistoriesModule)
+  },
 ];
 
 @NgModule({

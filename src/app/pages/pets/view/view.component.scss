@@ -45,16 +45,3 @@
     display: inline-flex;
     /* Mostrar los botones cuando se pasa el mouse sobre la nota */
 }
-
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-
-    .thumbnail {
-        width: 150px;
-        height: 100px;
-        object-fit: cover;
-        cursor: pointer;
-        margin: 5px;
-    }
-}

@@ -71,6 +71,13 @@ export const MENU: MenuItem[] = [
     },
     {
         id: 12,
+        label: 'Historias',
+        icon: 'ph-heartbeat-thin',
+        link: '/histories',
+        parentId: 1
+    },
+    {
+        id: 13,
         label: 'Empresa',
         icon: 'ph-gear-thin',
         link: '/settings',
