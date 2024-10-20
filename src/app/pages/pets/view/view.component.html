@@ -1,1 +1,337 @@
-<p>view works!</p>
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Mascotas" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="col-md-12">
+    <!-- Spinner de carga -->
+    <div *ngIf="isLoading" class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+        </div>
+    </div>
+</div>
+
+<div class="card" *ngIf="!isLoading">
+    <div class="profile-foreground position-relative">
+        <div class="profile-wid-bg position-static">
+            <img src="assets/images/small/cover.jpg" id="cover-img" alt="" class="profile-wid-img card-img-top">
+        </div>
+        <div class="bg-overlay bg-primary bg-opacity-75 card-img-top"></div>
+    </div>
+
+    <div class="card-body mt-n5">
+        <div class="position-relative mt-n3">
+            <div class="avatar-lg position-relative">
+                <img [src]="pet.petPhoto ? serverUrl + pet.petPhoto : 'assets/images/default/blank-photo.png'"
+                    id="user-img" alt="user-img" class="img-thumbnail rounded-circle user-profile-image"
+                    style="z-index: 1;">
+                <div class="avatar-xs p-0 rounded-circle profile-photo-edit position-absolute end-0 bottom-0">
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="mt-3">
+                <h3 class="fs-xl mb-1">{{ pet.petName }} <span class="text-muted" style="font-size: 12px;">({{
+                        pet.specieName }} - {{ pet.breedName }})</span></h3>
+                <p class="fs-md text-muted mb-0">{{ calculateAge(pet.petBirthDate) }}</p>
+            </div>
+            <div class="">
+                <a (click)="goBack()" class="btn btn-primary"><i class="ri-arrow-left-line align-bottom"></i>
+                    Regresar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="!isLoading">
+    <div class="col-xl-3">
+        <div class="card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4 pb-2">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0">Notas</h5>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="javascript:void(0);" class="badge bg-light text-secondary">
+                            <i class="ri-add-fill align-bottom me-1"></i> Nueva
+                        </a>
+                    </div>
+                </div>
+                <div *ngIf="visibleNotes && visibleNotes.length > 0" style="max-height: 160px; overflow-y: auto;"
+                    (scroll)="onScroll($event)" class="custom-scroll">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-start note-item"
+                            *ngFor="let note of visibleNotes" (mouseenter)="showActions($event)"
+                            (mouseleave)="hideActions($event)">
+                            <div class="ms-2 me-auto">
+                                <small>
+                                    <p>{{ note.noteDescription }}</p>
+                                    <strong>{{ note.noteDate | date: 'yyyy-MM-dd' }}</strong>
+                                </small>
+                            </div>
+                            <!-- Opciones de edición y eliminación -->
+                            <div class="btn-group action-buttons" style="display: none;">
+                                <button class="btn btn-outline-secondary btn-xs" (click)="openEditModal(note)">
+                                    <i class="feather icon-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-xs" (click)="deleteNote(note.id)">
+                                    <i class="feather icon-trash-2"></i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Mostrar la imagen "not-found" cuando no hay registros en la tabla -->
+                <div *ngIf="visibleNotes.length === 0" class="text-center">
+                    <img src="assets/images/default/no-data.png" class="img-fluid" style="max-width: 100px;">
+                    <p class="text-muted mt-2"><small class="text-muted">No hay notas disponibles para esta
+                            mascota.</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0">Citas</h5>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="javascript:void(0);" class="badge bg-info-subtle text-info fs-12"><i
+                                class="ri-add-fill align-bottom me-1"></i> Nueva</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end col-->
+    <div class="col-xl-9">
+
+        <tabset class="nav nav-pills arrow-navtabs nav-primary nav-custom-outline gap-2 profile-nav" role="tablist">
+            <tab heading="Información">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Código: </strong>{{ pet.petCode }}</p>
+                                <p class="mt-2"><strong>Fecha N.: </strong>{{ pet.petBirthDate | date:
+                                    'yyyy-MM-dd' }}
+                                </p>
+                                <p class="mt-2"><strong>Género: </strong>{{ pet.petGender }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Peso: </strong>{{ pet.petWeight }} Kg</p>
+                                <p class="mt-2"><strong>Especie: </strong>{{ pet.specieName }}</p>
+                                <p class="mt-2"><strong>Raza: </strong>{{ pet.breedName }}</p>
+                            </div>
+                            <div class="col-md-12">
+                                <p class="mt-2"><strong>Dueño: </strong>{{ pet.clientName }}</p>
+                            </div>
+                            <div *ngIf="pet.petAdditional">
+                                <hr class="mt-0 mb-3">
+                                <div class="col-md-12">
+                                    <strong>Información adicional: </strong>
+                                    <p>{{pet.petAdditional}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Historias" class="nav-item" (click)="loadHistories(pet.id)">
+                <div class="card">
+                    <div class="card-body">
+                        <button class="btn btn-xs btn-primary" (click)="addHistoy(pet.id)"
+                            style="border-bottom-left-radius: 0;">
+                            <i class="feather icon-plus"></i> Agregar Historia
+                        </button>
+
+                        <div class="col-md-12">
+                            <!-- Spinner de carga -->
+                            <div *ngIf="historiesLoading" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mostrar la imagen "not-found" cuando no hay registros en la tabla -->
+                        <div *ngIf="!historiesLoading && histories.length === 0" class="text-center">
+                            <img src="assets/images/default/no-data.png" class="img-fluid" style="max-width: 150px;">
+                            <p class="text-muted mt-2">No se encontraron historias para la mascota.</p>
+                        </div>
+
+                        <ul class="timeline" *ngIf="!historiesLoading && histories.length > 0">
+                            <li class="event" *ngFor="let history of histories">
+
+                                <accordion class="accordion" id="default-accordion-example">
+                                    <accordion-group class="accordion-item" [isOpen]="isFirstOpen">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <p><strong>N. Historia:</strong>
+                                                    {{history.history_code}}</p>
+                                            </div>
+                                            <div class="btn-group" role="group" aria-label="Basic example">
+                                                <button type="button" class="btn btn-outline-secondary btn-xs"
+                                                    (click)="editHistory(history)"><i
+                                                        class="feather icon-edit"></i></button>
+                                                <button type="button" class="btn btn-outline-danger btn-xs"
+                                                    (click)="deleteHistory(history.id)"><i
+                                                        class="feather icon-trash-2"></i></button>
+                                            </div>
+                                        </div>
+
+                                        <p class="mt-3"><strong>Motivo Consulta:</strong></p>
+                                        <p>{{history.history_reason}}</p>
+
+                                        <p class="mt-3"><strong>Síntomas:</strong></p>
+                                        <p>{{history.history_symptoms}}</p>
+
+                                        <p class="mt-3"><strong>Diagnóstico:</strong></p>
+                                        <p>{{history.history_diagnosis}}</p>
+
+                                        <p class="mt-3"><strong>Tratamiento:</strong></p>
+                                        <p>{{history.history_treatment}}</p>
+
+                                        <!-- Mostrar las imágenes adjuntas -->
+                                        <div *ngIf="history.files.length > 0">
+                                            <p class="mt-3"><strong>Archivos Adjuntos:</strong></p>
+                                            <div class="row">
+                                                <div class="col-md-3 position-relative img-th-card"
+                                                    *ngFor="let file of history.files">
+                                                    <ng-container *ngIf="isImage(file.file_type); else pdfTemplate">
+                                                        <div class="image-gallery">
+                                                            <img [src]="serverUrl + file.file_path"
+                                                                class="img-thumbnail clickable-image cursor-pointer"
+                                                                alt="Imagen adjunta" />
+                                                            <!-- Botón de eliminar en la esquina superior derecha -->
+                                                            <button type="button"
+                                                                class="btn btn-danger btn-xs position-absolute top-0 end-0 btn-delete-adjunt"
+                                                                (click)="deleteFile(file.id)">
+                                                                <i class="feather icon-trash-2"></i>
+                                                            </button>
+                                                        </div>
+                                                    </ng-container>
+                                                    <ng-template #pdfTemplate>
+                                                        <div class="position-relative img-th-card">
+                                                            <a href="javascript:void(0)">
+                                                                <img src="assets/images/default/pdf.png"
+                                                                    class="img-thumbnail cursor-pointer"
+                                                                    alt="PDF adjunto" />
+                                                            </a>
+                                                            <!-- Botón de eliminar para PDF en la esquina superior derecha -->
+                                                            <button type="button"
+                                                                class="btn btn-danger btn-xs position-absolute top-0 end-0 btn-delete-adjunt"
+                                                                (click)="deleteFile(file.id)">
+                                                                <i class="feather icon-trash-2"></i>
+                                                            </button>
+                                                        </div>
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </accordion-group>
+                                </accordion>
+
+                                <span class="badge bg-light text-dark">
+                                    <strong>Fecha:</strong> {{history.history_date}}
+                                    <strong>Hora:</strong> {{history.history_time}} |
+                                    <strong>Creado por:</strong> {{history.userName}}
+                                </span>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </tab>
+            <tab class="nav-item">
+                <ng-template tabHeading>
+                    <span class="d-md-inline-block" (click)="loadVaccines(pet.id)">Vacunas</span>
+                </ng-template>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="card-title mb-0">Gestión de Vacunas</h4>
+                            <!-- Botón Agregar Mascota alineado a la derecha -->
+                            <button class="btn btn-xs btn-primary" (click)="addModalVaccine.show()">
+                                <i class="feather icon-plus"></i> Agregar Vacuna
+                            </button>
+                        </div>
+
+                        <div class="col-md-12">
+                            <!-- Spinner de carga -->
+                            <div *ngIf="vaccinesLoading" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tabla de mascotas -->
+                        <app-datatable *ngIf="!vaccinesLoading" [columns]="[
+                        { label: 'Nombre', key: 'vaccineName', sortable: true },
+                        { label: 'Fecha', key: 'vaccineDate', sortable: true },
+                        { label: 'Producto (Lote)', key: 'productUsed' },
+                        { label: 'Obervaciones', key: 'observations' },
+                    ]" [data]="vaccines" [itemsPerPage]="5" [actions]="actions" [tableName]="'vaccineshistory'"
+                            [exportName]="'Vacuna Mascota'">
+                        </app-datatable>
+                    </div>
+                </div>
+            </tab>
+        </tabset>
+
+    </div>
+</div>
+<!--end col-->
+<div bsModal #addModalVaccine="bs-modal" id="addModalVaccine" class="modal fade" tabindex="-1" aria-labelledby="addModalVaccine"
+    aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalVaccine">Agregar Vacuna</h5>
+                <button type="button" class="btn-close" (click)="addModalVaccine.hide()"></button>
+            </div>
+            <form (ngSubmit)="onSubmitVaccine()">
+                <div class="modal-body">
+                    <div class="row mb-3">
+        
+                        <div class="col-md-6 mb-2">
+                            <label for="vaccineName" class="form-label">Vacuna</label>
+                            <ng-select [items]="allVaccines" bindLabel="vaccineName" bindValue="id"
+                                placeholder="Seleccione la vacuna" [(ngModel)]="newVaccine.vaccine_id" name="vaccine_id"
+                                required>
+                            </ng-select>
+                            <div *ngIf="errors?.vaccine_id" class="text-danger small">{{ errors.vaccine_id[0] }}
+                            </div>
+                        </div>
+        
+                        <div class="col-md-6 mb-2">
+                            <label for="vaccine_date" class="form-label">Fecha Aplicada</label>
+                            <input [(ngModel)]="newVaccine.vaccine_date" type="text" class="form-control" mwlFlatpickr [altInput]="true" maxDate="19-10-2024" [convertModelValue]="true" altFormat="d M, Y" dateFormat="d M, Y" name="dp" readonly>
+                            <div *ngIf="errors?.vaccine_date" class="text-danger small">{{ errors.vaccine_date[0] }}
+                            </div>
+                        </div>
+        
+                        <div class="col-md-12 mb-2">
+                            <label for="product" class="form-label">Producto (Fabricante, lote)</label>
+                            <input type="text" class="form-control" id="product" [(ngModel)]="newVaccine.product" name="product"
+                                required>
+                            <div *ngIf="errors?.product" class="text-danger small">{{ errors.product[0] }}</div>
+                        </div>
+        
+                        <div class="col-md-12">
+                            <label for="observation" class="form-label">Observaciones</label>
+                            <textarea [(ngModel)]="newVaccine.observation" name="observation" rows="3" style="resize: none;"
+                                required class="form-control"></textarea>
+                            <div *ngIf="errors?.observation" class="text-danger small">{{ errors.observation[0] }}</div>
+                        </div>
+        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="addModalVaccine.hide()">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

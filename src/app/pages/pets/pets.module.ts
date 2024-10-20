@@ -11,6 +11,8 @@ import { AngularCropperjsModule } from 'angular-cropperjs';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { FlatpickrModule } from 'angularx-flatpickr';
+import { TabsModule } from 'ngx-bootstrap/tabs';
+import { AccordionModule } from 'ngx-bootstrap/accordion';
 
 @NgModule({
   declarations: [
@@ -26,8 +28,10 @@ import { FlatpickrModule } from 'angularx-flatpickr';
     NgSelectModule,
     AngularCropperjsModule,
     SharedModule,
-    ModalModule,
+    ModalModule.forRoot(),
     FlatpickrModule.forRoot(),
+    TabsModule.forRoot(),  // Añadir forRoot() para TabsModule
+    AccordionModule.forRoot()  // Añadir forRoot() para AccordionModule
   ]
 })
 export class PetsModule { }
