@@ -32,6 +32,7 @@ export class EditComponent implements OnInit {
   };
 
   isLoading: boolean = true;  // Variable para el efecto de carga
+  isLoadingBtn: boolean = false;
   species: any[] = [];
   breeds: any[] = [];
   clients: any[] = [];
@@ -154,11 +155,11 @@ export class EditComponent implements OnInit {
 
   onUpdate(): void {
 
+    this.isLoadingBtn = true;
+
     if (this.editPet.petBirthDate) {
       this.editPet.petBirthDate = this.utilitiesService.formatToDateString(this.editPet.petBirthDate);
     }
-
-    //this.editPet.petBirthDate = formattedBirthDate;
 
     // Realizamos la solicitud de actualización de los datos
     this.apiService.put(`pets/${this.petId}`, this.editPet, true).subscribe(
@@ -172,14 +173,17 @@ export class EditComponent implements OnInit {
             this.uploadPhoto(imageFile);  // Subir la imagen
           } else {
             this.router.navigate(['/pets']);
+            this.isLoadingBtn = false
           }
         }
       },
       (error) => {
         if (error.status === 422) {  // Validación de errores
           this.errors = error.error.errors;
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo actualizar la mascota');
+          this.isLoadingBtn = false;
         }
       }
     );
@@ -195,6 +199,7 @@ export class EditComponent implements OnInit {
         if (response.success) {
           this.utilitiesService.showAlert('success', response.message);
           this.router.navigate(['/pets']);
+          this.isLoadingBtn = false;
         }
       },
       (error) => {

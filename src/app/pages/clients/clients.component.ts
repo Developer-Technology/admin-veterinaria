@@ -81,8 +81,8 @@ export class ClientsComponent implements OnInit {
           this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`clients/${client.id}`, true).subscribe(
             (response) => {
-              this.utilitiesService.showAlert('success', 'Cliente eliminado correctamente');
               this.utilitiesService.showLoadingAlert('close');
+              this.utilitiesService.showAlert('success', 'Cliente eliminado correctamente');
               this.loadClients();
             },
             (error) => {

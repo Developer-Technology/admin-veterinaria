@@ -136,9 +136,13 @@
                         <button type="button" class="btn btn-danger me-2" (click)="resetForm(petForm)">
                             <i class="feather icon-refresh-cw"></i> Resetear
                         </button>
-                        <button type="submit" class="btn btn-primary" [disabled]="petForm.invalid">
-                            <i class="feather icon-check-circle"></i> Actualizar Mascota
+                        <button type="submit" class="btn btn-primary" [disabled]="petForm.invalid || isLoadingBtn">
+                            <span *ngIf="!isLoadingBtn"><i class="feather icon-check-circle"></i> Actualizar Mascota</span>
+                            <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                                aria-hidden="true"></span>
+                            <span *ngIf="isLoadingBtn" class="sr-only"></span>
                         </button>
+
                     </div>
 
                 </form>

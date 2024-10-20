@@ -35,7 +35,7 @@ export class PetsComponent implements OnInit {
 
   // Cargar mascotas desde el API
   loadPets(): void {
-    this.isLoading = true;  // Iniciar el estado de carga
+    //this.isLoading = true;  // Iniciar el estado de carga
     this.apiService.get('pets', true).subscribe(
       (response) => {
         if (response.success) {
@@ -115,17 +115,19 @@ export class PetsComponent implements OnInit {
     this.utilitiesService
       .showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer! Se eliminará la mascota con todos sus registros asociados.')
       .then((result) => {
+        this.utilitiesService.showLoadingAlert('');
         if (result.isConfirmed) { // Mostrar el modal de carga antes de la operación
-
           this.apiService.delete(`pets/${pet.id}`, true).subscribe(
             (response) => {
               this.deleteVaccines(pet.id);
               this.deleteAllNotes(pet.id);
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'Mascota y registros asociados eliminados correctamente');
               this.loadPets(); // Actualizar la lista de mascotas
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la mascota.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );
