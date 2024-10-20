@@ -44,7 +44,7 @@
 </div>
 
 <div class="row" *ngIf="!isLoading">
-    <div class="col-xl-3">
+    <div class="col-xl-3 col-lg-3">
         <div class="card overflow-hidden">
             <div class="card-body">
                 <div class="d-flex align-items-center mb-4 pb-2">
@@ -104,10 +104,13 @@
         </div>
     </div>
     <!--end col-->
-    <div class="col-xl-9">
+    <div class="col-xl-9 col-lg-9">
 
         <tabset class="nav nav-pills arrow-navtabs nav-primary nav-custom-outline gap-2 profile-nav" role="tablist">
-            <tab heading="Información">
+            <tab class="nav-item">
+                <ng-template tabHeading>
+                    <span class="d-md-inline-block">Información</span>
+                </ng-template>
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
@@ -137,7 +140,10 @@
                     </div>
                 </div>
             </tab>
-            <tab heading="Historias" class="nav-item" (click)="loadHistories(pet.id)">
+            <tab class="nav-item" (click)="loadHistories(pet.id)">
+                <ng-template tabHeading>
+                    <span class="d-md-inline-block" (click)="loadHistories(pet.id)">Historias</span>
+                </ng-template>
                 <div class="card">
                     <div class="card-body">
                         <button class="btn btn-xs btn-primary" (click)="addHistoy(pet.id)"
@@ -245,7 +251,7 @@
             </tab>
             <tab class="nav-item">
                 <ng-template tabHeading>
-                    <span class="d-md-inline-block" (click)="loadVaccines(pet.id)">Vacunas</span>
+                    <span class="d-md-inline-block nav-title-span" (click)="loadVaccines(pet.id)">Vacunas</span>
                 </ng-template>
                 <div class="card">
                     <div class="card-body">
@@ -282,18 +288,20 @@
     </div>
 </div>
 <!--end col-->
-<div bsModal #addModalVaccine="bs-modal" id="addModalVaccine" class="modal fade" tabindex="-1" aria-labelledby="addModalVaccine"
-    aria-hidden="true" style="display: none;">
+
+<!-- Agregar Vacuna -->
+<div bsModal #addModalVaccine="bs-modal" id="addModalVaccine" class="modal fade" tabindex="-1"
+    aria-labelledby="addModalVaccine" aria-hidden="true" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addModalVaccine">Agregar Vacuna</h5>
                 <button type="button" class="btn-close" (click)="addModalVaccine.hide()"></button>
             </div>
-            <form (ngSubmit)="onSubmitVaccine()">
+            <form (ngSubmit)="onSubmitVaccine(addModalVaccine)">
                 <div class="modal-body">
                     <div class="row mb-3">
-        
+
                         <div class="col-md-6 mb-2">
                             <label for="vaccineName" class="form-label">Vacuna</label>
                             <ng-select [items]="allVaccines" bindLabel="vaccineName" bindValue="id"
@@ -303,33 +311,101 @@
                             <div *ngIf="errors?.vaccine_id" class="text-danger small">{{ errors.vaccine_id[0] }}
                             </div>
                         </div>
-        
+
                         <div class="col-md-6 mb-2">
                             <label for="vaccine_date" class="form-label">Fecha Aplicada</label>
-                            <input [(ngModel)]="newVaccine.vaccine_date" type="text" class="form-control" mwlFlatpickr [altInput]="true" maxDate="19-10-2024" [convertModelValue]="true" altFormat="d M, Y" dateFormat="d M, Y" name="dp" readonly>
+                            <input [(ngModel)]="newVaccine.vaccine_date" type="text" class="form-control" mwlFlatpickr
+                                [altInput]="true" maxDate="maxDate" [convertModelValue]="true" altFormat="d M, Y"
+                                dateFormat="d M, Y" name="dp" readonly>
                             <div *ngIf="errors?.vaccine_date" class="text-danger small">{{ errors.vaccine_date[0] }}
                             </div>
                         </div>
-        
+
                         <div class="col-md-12 mb-2">
                             <label for="product" class="form-label">Producto (Fabricante, lote)</label>
-                            <input type="text" class="form-control" id="product" [(ngModel)]="newVaccine.product" name="product"
-                                required>
+                            <input type="text" class="form-control" id="product" [(ngModel)]="newVaccine.product"
+                                name="product" required>
                             <div *ngIf="errors?.product" class="text-danger small">{{ errors.product[0] }}</div>
                         </div>
-        
+
                         <div class="col-md-12">
                             <label for="observation" class="form-label">Observaciones</label>
-                            <textarea [(ngModel)]="newVaccine.observation" name="observation" rows="3" style="resize: none;"
-                                required class="form-control"></textarea>
+                            <textarea [(ngModel)]="newVaccine.observation" name="observation" rows="3"
+                                style="resize: none;" required class="form-control"></textarea>
                             <div *ngIf="errors?.observation" class="text-danger small">{{ errors.observation[0] }}</div>
                         </div>
-        
+
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="addModalVaccine.hide()">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!isFormValidVaccine() || isLoadingBtn">
+                        <span *ngIf="!isLoadingBtn">Agregar</span>
+                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isLoadingBtn" class="sr-only"></span>
+                    </button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- Editar Vacuna -->
+<div bsModal #editVaccineModal="bs-modal" id="editVaccineModal" class="modal fade" tabindex="-1"
+    aria-labelledby="editVaccineModal" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editVaccineModal">Editar Vacuna</h5>
+                <button type="button" class="btn-close" (click)="editVaccineModal.hide()"></button>
+            </div>
+            <form (ngSubmit)="onEditSubmitVaccine()">
+                <div class="modal-body">
+                    <div class="row mb-3">
+
+                        <div class="col-md-6 mb-2">
+                            <label for="vaccineName" class="form-label">Vacuna</label>
+                            <ng-select [items]="allVaccines" bindLabel="vaccineName" bindValue="id"
+                                placeholder="Seleccione la vacuna" [(ngModel)]="selectedVaccine.vaccineId"
+                                name="vaccine_id" required>
+                            </ng-select>
+                            <div *ngIf="errors?.vaccine_id" class="text-danger small">{{ errors.vaccine_id[0] }}</div>
+                        </div>
+
+                        <div class="col-md-6 mb-2">
+                            <label for="vaccine_date" class="form-label">Fecha Aplicada</label>
+                            <input [(ngModel)]="selectedVaccine.vaccineDate" type="text" class="form-control"
+                                mwlFlatpickr [altInput]="true" [convertModelValue]="true" altFormat="d M, Y"
+                                dateFormat="d M, Y" name="dp" readonly>
+                            <div *ngIf="errors?.vaccine_date" class="text-danger small">{{ errors.vaccine_date[0] }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-2">
+                            <label for="product" class="form-label">Producto (Fabricante, lote)</label>
+                            <input type="text" class="form-control" id="product"
+                                [(ngModel)]="selectedVaccine.productUsed" name="product" required>
+                            <div *ngIf="errors?.product" class="text-danger small">{{ errors.product[0] }}</div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label for="observation" class="form-label">Observaciones</label>
+                            <textarea [(ngModel)]="selectedVaccine.observations" name="observation" rows="3"
+                                style="resize: none;" required class="form-control"></textarea>
+                            <div *ngIf="errors?.observation" class="text-danger small">{{ errors.observation[0] }}</div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="editVaccineModal.hide()">Cerrar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="isLoadingBtn">
+                        <span *ngIf="!isLoadingBtn">Actualizar</span>
+                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isLoadingBtn" class="sr-only"></span>
+                    </button>
                 </div>
             </form>
         </div><!-- /.modal-content -->

@@ -4,7 +4,7 @@ import { ApiService } from '../../../services/api.service';
 import { UtilitiesService } from '../../../services/utilities.service';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-view-pet',
@@ -13,9 +13,8 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 })
 export class ViewComponent implements OnInit {
 
-  //@ViewChild('addVaccineModalTemplate') addVaccineModalTemplate!: TemplateRef<any>;
   @ViewChild('editModal') editModal!: TemplateRef<any>;
-  @ViewChild('editVaccineModal') editVaccineModal!: TemplateRef<any>;
+  @ViewChild('editVaccineModal', { static: false }) editVaccineModal?: ModalDirective;
   colorTheme: any = 'theme-blue';
   bsConfig?: Partial<BsDatepickerConfig>;
   breadCrumbItems!: Array<{}>;
@@ -28,6 +27,7 @@ export class ViewComponent implements OnInit {
   visibleNotes: any[] = [];
   pet: any = {};  // Información de la mascota
   isLoading: boolean = true;
+  isLoadingBtn: boolean = false;
   vaccinesLoading: boolean = false;  // Nueva bandera para el estado de carga de vacunas
   vaccinesLoaded: boolean = false;   // Nueva bandera para saber si ya se han cargado las vacunas
   selectedNote: any = null;
@@ -151,7 +151,6 @@ export class ViewComponent implements OnInit {
 
   // Función para cargar las notas con paginación
   loadHistories(petId: string): void {
-    this.historiesLoading = true;
     this.apiService.get(`pet-histories/${petId}`, true).subscribe(
       (response) => {
         if (response.success) {
@@ -215,6 +214,7 @@ export class ViewComponent implements OnInit {
   }
 
   onSubmit(modal: any): void {
+    this.isLoadingBtn = true;
     // Asignar la fecha actual antes de enviar el formulario
     this.newNote.noteDate = new Date().toISOString().slice(0, 10);  // Fecha actual en formato YYYY-MM-DD
 
@@ -233,13 +233,16 @@ export class ViewComponent implements OnInit {
           this.errors = {};
           modal.close();
           this.utilitiesService.showAlert('success', 'Nota agregada correctamente.');
+          this.isLoadingBtn = false;
         }
       },
       (error) => {
         if (error.status === 422) {
           this.errors = error.error.errors;
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo agregar la nota.');
+          this.isLoadingBtn = false;
         }
       }
     );
@@ -388,6 +391,10 @@ export class ViewComponent implements OnInit {
     );
   }
 
+  isFormValidVaccine(): boolean {
+    return this.newVaccine.product.trim() !== '';
+  }
+
   // Abre la ventana modal para agregar la vacuna
   addModalVaccine(addModalVaccine: TemplateRef<any>) {
     this.newVaccine = {
@@ -402,7 +409,8 @@ export class ViewComponent implements OnInit {
   }
 
   // Guarda el registro de la vacuna aplicada
-  onSubmitVaccine() {
+  onSubmitVaccine(modal: any): any {
+    this.isLoadingBtn = true;
     // Asignar el pet_id si no está presente por alguna razón
     if (!this.newVaccine.pet_id) {
       this.newVaccine.pet_id = this.pet.id;
@@ -420,14 +428,18 @@ export class ViewComponent implements OnInit {
           this.loadVaccines(this.pet.id); // Recargar las notas paginadas desde el inicio
           this.newVaccine = { pet_id: this.pet.id, vaccine_id: '', product: '', observation: '' };  // Restablecer los datos de la nota
           this.errors = {};
+          this.isLoadingBtn = false;
+          modal.hide();
           this.utilitiesService.showAlert('success', 'Vacuna agregada correctamente.');
         }
       },
       (error) => {
         if (error.status === 422) {
           this.errors = error.error.errors;
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo agregar la vacuna.');
+          this.isLoadingBtn = false;
         }
       }
     );
@@ -453,18 +465,23 @@ export class ViewComponent implements OnInit {
       });
   }
 
-  openEditModalVaccine(vaccine: any): void {
+  openEditModalVaccine(vaccine: any) {
     this.selectedVaccine = { ...vaccine };  // Clonar el objeto de la vacuna
-    // Convertir la fecha de nacimiento para usarla en ngbDatepicker
+    // Convertir la fecha de nacimiento en un objeto Date para usarlo con flatpickr
+    if (this.selectedVaccine.vaccineDate) {
+      this.selectedVaccine.vaccineDate = new Date(this.selectedVaccine.vaccineDate);
+    }
     this.errors = {};  // Limpiar los errores previos si los hubiera
-    this.modalService.show(this.editVaccineModal);  // Abrir el modal de edición
+    this.editVaccineModal?.show();
   }
 
   // Método para guardar los cambios de la vacuna editada
-  onEditSubmitVaccine(modal: any): void {
-
+  onEditSubmitVaccine() {
+    this.isLoadingBtn = true;
     // Asignar la fecha en el formato adecuado antes de enviar el formulario
-
+    if (this.selectedVaccine.vaccineDate) {
+      this.selectedVaccine.vaccineDate = this.utilitiesService.formatToDateString(this.selectedVaccine.vaccineDate);
+    }
     const payload = {
       vaccine_id: this.selectedVaccine.vaccineId,
       vaccine_date: this.selectedVaccine.vaccineDate,
@@ -478,15 +495,18 @@ export class ViewComponent implements OnInit {
         if (response.success) {
           // Recargar las vacunas de la mascota
           this.loadVaccines(this.pet.id);
-          modal.close();
+          this.editVaccineModal?.hide();
+          this.isLoadingBtn = false;
           this.utilitiesService.showAlert('success', 'Vacuna actualizada correctamente.');
         }
       },
       (error) => {
         if (error.status === 422) {
           this.errors = error.error.errors;
+          this.isLoadingBtn = false;
         } else {
           this.utilitiesService.showAlert('error', 'No se pudo actualizar la vacuna.');
+          this.isLoadingBtn = false;
         }
       }
     );
@@ -498,11 +518,10 @@ export class ViewComponent implements OnInit {
     this.router.navigate(['/histories/add', encodedId]);  // Redirige a la ruta de para agregar historia
   }
 
-  // Añade esto a tu componente .ts
+  // Cladifica tipo de documento
   isImage(fileType: string): boolean {
     return ['jpg', 'jpeg', 'png', 'gif'].includes(fileType.toLowerCase());
   }
-
 
   // Método para abrir el PDF en una ventana modal
   openPdfModal(content: TemplateRef<any>, filePath: string): void {
