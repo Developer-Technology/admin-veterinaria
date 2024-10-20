@@ -13,7 +13,7 @@ import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap/modal'
 })
 export class ViewComponent implements OnInit {
 
-  @ViewChild('editModal') editModal!: TemplateRef<any>;
+  @ViewChild('editModalNote', { static: false }) editModalNote?: ModalDirective;
   @ViewChild('editVaccineModal', { static: false }) editVaccineModal?: ModalDirective;
   colorTheme: any = 'theme-blue';
   bsConfig?: Partial<BsDatepickerConfig>;
@@ -30,7 +30,9 @@ export class ViewComponent implements OnInit {
   isLoadingBtn: boolean = false;
   vaccinesLoading: boolean = false;  // Nueva bandera para el estado de carga de vacunas
   vaccinesLoaded: boolean = false;   // Nueva bandera para saber si ya se han cargado las vacunas
-  selectedNote: any = null;
+  selectedNote: any = {
+    noteDescription: ''
+  };
   serverUrl: string;
   errors: any = {};
   newNote: any = {
@@ -197,62 +199,9 @@ export class ViewComponent implements OnInit {
     this.router.navigate(['/pets']);
   }
 
-  openAddModal(content: TemplateRef<any>): void {
-    this.newNote = {
-      pet_id: this.pet.id,  // Mantener el pet_id
-      noteDescription: '',
-      noteDate: new Date().toISOString().slice(0, 10)  // Establecer la fecha actual en formato YYYY-MM-DD
-    };
-    this.errors = {};
-    this.updateCharacterCount();  // Restablecer el contador de caracteres
-    this.modalService.show(content);
-  }
-
   // Función para actualizar el contador de caracteres
   updateCharacterCount(): void {
     this.remainingCharacters = this.maxCharacters - (this.newNote.noteDescription?.length || 0);
-  }
-
-  onSubmit(modal: any): void {
-    this.isLoadingBtn = true;
-    // Asignar la fecha actual antes de enviar el formulario
-    this.newNote.noteDate = new Date().toISOString().slice(0, 10);  // Fecha actual en formato YYYY-MM-DD
-
-    // Hacer la petición para crear la nota
-    this.apiService.post('petnotes', this.newNote, true).subscribe(
-      (response) => {
-        if (response.success) {
-          // Agregar la nueva nota al principio de la lista de notas y actualizar la vista
-          this.notes.unshift(response.data);
-          this.visibleNotes = []; // Limpiar las notas visibles
-          this.currentPage = 1; // Reiniciar la página actual para la paginación
-          this.allNotesLoaded = false; // Permitir la carga de más notas
-          this.paginateNotes(); // Recargar las notas paginadas desde el inicio
-
-          this.newNote = { pet_id: this.pet.id, noteDescription: '', noteDate: '' };  // Restablecer los datos de la nota
-          this.errors = {};
-          modal.close();
-          this.utilitiesService.showAlert('success', 'Nota agregada correctamente.');
-          this.isLoadingBtn = false;
-        }
-      },
-      (error) => {
-        if (error.status === 422) {
-          this.errors = error.error.errors;
-          this.isLoadingBtn = false;
-        } else {
-          this.utilitiesService.showAlert('error', 'No se pudo agregar la nota.');
-          this.isLoadingBtn = false;
-        }
-      }
-    );
-  }
-
-  openEditModal(note: any): void {
-    this.selectedNote = { ...note };  // Clonar el objeto de la nota completa
-    this.errors = {};
-    this.updateCharacterCountEdit();  // Actualizar el contador de caracteres basado en la nota
-    this.modalService.show(this.editModal);  // Abrir modal de edición
   }
 
   // Método para actualizar el contador de caracteres al editar
@@ -260,52 +209,22 @@ export class ViewComponent implements OnInit {
     this.remainingCharacters = this.maxCharacters - (this.selectedNote.noteDescription?.length || 0);
   }
 
-  // Enviar formulario para editar una nota existente
-  onEditSubmit(modal: any): void {
-    // Asegúrate de que pet_id esté en selectedNote
-    if (!this.selectedNote.pet_id) {
-      this.selectedNote.pet_id = this.pet.id;  // Asignar el pet_id correcto
-    }
-
-    this.apiService.put(`petnotes/${this.selectedNote.id}`, this.selectedNote, true).subscribe(
-      (response) => {
-        if (response.success) {
-          const index = this.notes.findIndex(s => s.id === this.selectedNote.id);
-          if (index !== -1) {
-            this.notes[index] = response.data;
-          }
-          modal.close();
-          this.utilitiesService.showAlert('success', 'Nota actualizada correctamente.');
-
-          // Asegúrate de que pet_id esté definido en el response.data
-          const petId = response.data.pet_id || this.selectedNote.pet_id;
-
-          this.loadNotes(petId);  // Llamar a loadNotes con el pet_id correcto
-        }
-      },
-      (error) => {
-        if (error.status === 422) {
-          this.errors = error.error.errors;
-        } else {
-          this.utilitiesService.showAlert('error', 'No se pudo actualizar la especie.');
-        }
-      }
-    );
-  }
-
   // Eliminar una nota y actualizar la tabla
   deleteNote(id: string): void {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`petnotes/${id}`, true).subscribe(
             (result) => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'La nota ha sido eliminada.');
               // Usar el pet_id que ya tienes en el componente para recargar las notas
               this.loadNotes(this.pet.id);
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la nota.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );
@@ -391,8 +310,14 @@ export class ViewComponent implements OnInit {
     );
   }
 
+  // Validamos formulario Vacuna
   isFormValidVaccine(): boolean {
     return this.newVaccine.product.trim() !== '';
+  }
+
+  // Validamos formulario Nota
+  isFormValidNote(): boolean {
+    return this.newNote.noteDescription.trim() !== '';
   }
 
   // Abre la ventana modal para agregar la vacuna
@@ -406,6 +331,17 @@ export class ViewComponent implements OnInit {
     };
     this.errors = {};
     this.modalRef = this.modalService.show(addModalVaccine);
+  }
+
+  openAddModal(addModalNote: TemplateRef<any>) {
+    this.newNote = {
+      pet_id: this.pet.id,  // Mantener el pet_id
+      noteDescription: '',
+      noteDate: new Date().toISOString().slice(0, 10)  // Establecer la fecha actual en formato YYYY-MM-DD
+    };
+    this.errors = {};
+    this.updateCharacterCount();  // Restablecer el contador de caracteres
+    this.modalRef = this.modalService.show(addModalNote);
   }
 
   // Guarda el registro de la vacuna aplicada
@@ -445,24 +381,71 @@ export class ViewComponent implements OnInit {
     );
   }
 
+  // Guarda la nota
+  onSubmit(modal: any): any {
+    this.isLoadingBtn = true;
+    // Asignar la fecha actual antes de enviar el formulario
+    this.newNote.noteDate = new Date().toISOString().slice(0, 10);  // Fecha actual en formato YYYY-MM-DD
+    this.newNote.pet_id = this.pet.id;
+
+    // Hacer la petición para crear la nota
+    this.apiService.post('petnotes', this.newNote, true).subscribe(
+      (response) => {
+        if (response.success) {
+          // Agregar la nueva nota al principio de la lista de notas y actualizar la vista
+          this.notes.unshift(response.data);
+          this.visibleNotes = []; // Limpiar las notas visibles
+          this.currentPage = 1; // Reiniciar la página actual para la paginación
+          this.allNotesLoaded = false; // Permitir la carga de más notas
+          this.paginateNotes(); // Recargar las notas paginadas desde el inicio
+
+          this.newNote = { pet_id: this.pet.id, noteDescription: '', noteDate: '' };  // Restablecer los datos de la nota
+          this.errors = {};
+          modal.hide();
+          this.utilitiesService.showAlert('success', 'Nota agregada correctamente.');
+          this.isLoadingBtn = false;
+        }
+      },
+      (error) => {
+        if (error.status === 422) {
+          this.errors = error.error.errors;
+          this.isLoadingBtn = false;
+        } else {
+          this.utilitiesService.showAlert('error', 'No se pudo agregar la nota.');
+          this.isLoadingBtn = false;
+        }
+      }
+    );
+  }
+
   // Eliminar una vacuna y actualizar la tabla
   deleteVaccine(id: string): void {
     this.utilitiesService.showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`vaccineshistory/${id}`, true).subscribe(
             (result) => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'La vacuna ha sido eliminada.');
               // Usar el pet_id que ya tienes en el componente para recargar las vacunas
               this.loadVaccines(this.pet.id);
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la vacuna.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );
         }
       });
+  }
+
+  openEditModal(note: any) {
+    this.selectedNote = { ...note };  // Clonar el objeto de la nota completa
+    this.errors = {};
+    this.updateCharacterCountEdit();  // Actualizar el contador de caracteres basado en la nota
+    this.editModalNote?.show();
   }
 
   openEditModalVaccine(vaccine: any) {
@@ -473,6 +456,41 @@ export class ViewComponent implements OnInit {
     }
     this.errors = {};  // Limpiar los errores previos si los hubiera
     this.editVaccineModal?.show();
+  }
+
+  // Enviar formulario para editar una nota existente
+  onEditSubmit() {
+    this.isLoadingBtn = true;
+    // Asegúrate de que pet_id esté en selectedNote
+    if (!this.selectedNote.pet_id) {
+      this.selectedNote.pet_id = this.pet.id;  // Asignar el pet_id correcto
+    }
+
+    this.apiService.put(`petnotes/${this.selectedNote.id}`, this.selectedNote, true).subscribe(
+      (response) => {
+        if (response.success) {
+          const index = this.notes.findIndex(s => s.id === this.selectedNote.id);
+          if (index !== -1) {
+            this.notes[index] = response.data;
+          }
+          this.editModalNote?.hide();
+          this.utilitiesService.showAlert('success', 'Nota actualizada correctamente.');
+          // Asegúrate de que pet_id esté definido en el response.data
+          const petId = response.data.pet_id || this.selectedNote.pet_id;
+          this.isLoadingBtn = false;
+          this.loadNotes(petId);  // Llamar a loadNotes con el pet_id correcto
+        }
+      },
+      (error) => {
+        if (error.status === 422) {
+          this.errors = error.error.errors;
+          this.isLoadingBtn = false;
+        } else {
+          this.utilitiesService.showAlert('error', 'No se pudo actualizar la especie.');
+          this.isLoadingBtn = false;
+        }
+      }
+    );
   }
 
   // Método para guardar los cambios de la vacuna editada
@@ -542,14 +560,16 @@ export class ViewComponent implements OnInit {
       .showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer! Se eliminará la historia con todos los archivos adjuntos.')
       .then((result) => {
         if (result.isConfirmed) {
-
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`pet-history/${historyId}`, true).subscribe(
             (response) => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'Historia y archivos asociados eliminados correctamente');
               this.loadHistories(this.pet.id);
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar la historia.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );
@@ -563,14 +583,16 @@ export class ViewComponent implements OnInit {
       .showConfirmationDelet('¿Estás seguro?', '¡Esta acción no se puede deshacer!')
       .then((result) => {
         if (result.isConfirmed) {
-
+          this.utilitiesService.showLoadingAlert('');
           this.apiService.delete(`files-history/${fileId}`, true).subscribe(
             (response) => {
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('success', 'Archivo eliminado correctamente');
               this.loadHistories(this.pet.id);
             },
             (error) => {
               const errorMessage = error?.error?.message || 'No se pudo eliminar el archivo.';
+              this.utilitiesService.showLoadingAlert('close');
               this.utilitiesService.showAlert('error', errorMessage);
             }
           );

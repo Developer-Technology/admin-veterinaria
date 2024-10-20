@@ -52,7 +52,8 @@
                         <h5 class="card-title mb-0">Notas</h5>
                     </div>
                     <div class="flex-shrink-0">
-                        <a href="javascript:void(0);" class="badge bg-light text-secondary">
+                        <a href="javascript:void(0);" class="badge bg-light text-secondary"
+                            (click)="addModalNote.show()">
                             <i class="ri-add-fill align-bottom me-1"></i> Nueva
                         </a>
                     </div>
@@ -64,18 +65,16 @@
                             *ngFor="let note of visibleNotes" (mouseenter)="showActions($event)"
                             (mouseleave)="hideActions($event)">
                             <div class="ms-2 me-auto">
-                                <small>
-                                    <p>{{ note.noteDescription }}</p>
-                                    <strong>{{ note.noteDate | date: 'yyyy-MM-dd' }}</strong>
-                                </small>
+                                {{ note.noteDescription }}
+                                <br><span style="font-size: 10px;">{{ note.noteDate | date: 'yyyy-MM-dd' }}</span>
                             </div>
                             <!-- Opciones de edición y eliminación -->
                             <div class="btn-group action-buttons" style="display: none;">
-                                <button class="btn btn-outline-secondary btn-xs" (click)="openEditModal(note)">
-                                    <i class="feather icon-edit"></i>
+                                <button class="btn btn-outline-secondary btn-sm" (click)="openEditModal(note)">
+                                    <i class="bi bi-pen"></i>
                                 </button>
-                                <button class="btn btn-outline-danger btn-xs" (click)="deleteNote(note.id)">
-                                    <i class="feather icon-trash-2"></i>
+                                <button class="btn btn-outline-danger btn-sm" (click)="deleteNote(note.id)">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </li>
@@ -400,6 +399,80 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="editVaccineModal.hide()">Cerrar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="isLoadingBtn">
+                        <span *ngIf="!isLoadingBtn">Actualizar</span>
+                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isLoadingBtn" class="sr-only"></span>
+                    </button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- Agregar Nota -->
+<div bsModal #addModalNote="bs-modal" id="addModalNote" class="modal fade" tabindex="-1" aria-labelledby="addModalNote"
+    aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalNote">Agregar Nota</h5>
+                <button type="button" class="btn-close" (click)="addModalNote.hide()"></button>
+            </div>
+            <form (ngSubmit)="onSubmit(addModalNote)">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="noteDescription" class="form-label">Nota</label>
+                        <textarea [(ngModel)]="newNote.noteDescription" name="noteDescription" maxlength="140"
+                            (input)="updateCharacterCount()" rows="3" style="resize: none;" required
+                            class="form-control"></textarea>
+                        <div *ngIf="errors?.noteDescription" class="text-danger small">{{ errors.noteDescription[0] }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6"><small>Máximo de 140 caracteres</small></div>
+                            <div class="col-md-6 text-end"><small>{{ remainingCharacters }}</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="addModalNote.hide()">Cerrar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!isFormValidNote() || isLoadingBtn">
+                        <span *ngIf="!isLoadingBtn">Agregar</span>
+                        <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isLoadingBtn" class="sr-only"></span>
+                    </button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- Editar Nota -->
+<div bsModal #editModalNote="bs-modal" id="editModalNote" class="modal fade" tabindex="-1" aria-labelledby="editModalNote"
+    aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalNote">Editar Nota</h5>
+                <button type="button" class="btn-close" (click)="editModalNote.hide()"></button>
+            </div>
+            <form (ngSubmit)="onEditSubmit()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="noteDescription" class="form-label">Nota</label>
+                        <textarea [(ngModel)]="selectedNote.noteDescription" name="noteDescription" maxlength="140"
+                            (input)="updateCharacterCountEdit()" rows="3" style="resize: none;" required
+                            class="form-control"></textarea>
+                        <div *ngIf="errors?.noteDescription" class="text-danger small">{{ errors.noteDescription[0] }}</div>
+                        <div class="row">
+                            <div class="col-md-6"><small>Máximo de 140 caracteres</small></div>
+                            <div class="col-md-6 text-end"><small>{{ remainingCharacters }}</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
                     <button type="submit" class="btn btn-primary" [disabled]="isLoadingBtn">
                         <span *ngIf="!isLoadingBtn">Actualizar</span>
                         <span *ngIf="isLoadingBtn" class="spinner-border spinner-border-sm" role="status"
