@@ -1,1 +1,179 @@
-<p>edit works!</p>
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Mascotas" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Editar Mascota</h4>
+                <p class="text-muted">Modifique los siguientes campos para actualizar la información de la mascota.</p>
+            </div><!-- end card header -->
+
+            <div class="card-body">
+                <!-- Spinner de carga -->
+                <div *ngIf="isLoading" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only"></span>
+                    </div>
+                </div>
+
+                <!-- Formulario para editar la mascota -->
+                <form *ngIf="!isLoading" (ngSubmit)="onUpdate()" #petForm="ngForm" class="row g-3">
+
+                    <!-- Sección Izquierda: Información de la Mascota -->
+                    <div class="col-md-9">
+                        <div class="row">
+                            <!-- Nombre de la Mascota -->
+                            <div class="col-md-6">
+                                <label for="petName" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="petName" [(ngModel)]="editPet.petName"
+                                    name="petName" required>
+                                <div *ngIf="errors?.petName" class="text-danger small">{{ errors.petName[0] }}</div>
+                            </div>
+
+                            <!-- Fecha de Nacimiento con DatePicker -->
+                            <div class="col-md-6">
+                                <label for="petBirthDate" class="form-label">Fecha de Nacimiento</label>
+                                <div class="input-group">
+                                    <input [(ngModel)]="editPet.petBirthDate" type="text" class="form-control" mwlFlatpickr
+                                    [altInput]="true" altFormat="d M, Y" dateFormat="d M, Y" name="dp" readonly>
+                                </div>
+                                <div *ngIf="errors?.petBirthDate" class="text-danger small">{{ errors.petBirthDate[0] }}
+                                </div>
+                            </div>
+
+                            <!-- Especie -->
+                            <div class="col-md-6 mt-3">
+                                <label for="species" class="form-label">Especie</label>
+                                <ng-select [items]="species" bindLabel="specieName" bindValue="id"
+                                    placeholder="Seleccione la especie" [(ngModel)]="editPet.species_id"
+                                    name="species_id" (change)="onSpeciesChange()" required>
+                                </ng-select>
+                                <div *ngIf="errors?.species_id" class="text-danger small">{{ errors.species_id[0] }}
+                                </div>
+                            </div>
+
+                            <!-- Raza -->
+                            <div class="col-md-6 mt-3">
+                                <label for="breeds" class="form-label">Raza</label>
+                                <ng-select [items]="breeds" bindLabel="breedName" bindValue="id"
+                                    placeholder="Seleccione la raza" [(ngModel)]="editPet.breeds_id" name="breeds_id"
+                                    required>
+                                </ng-select>
+                                <div *ngIf="errors?.breeds_id" class="text-danger small">{{ errors.breeds_id[0] }}</div>
+                            </div>
+
+                            <!-- Peso de la Mascota -->
+                            <div class="col-md-6 mt-3">
+                                <label for="petWeight" class="form-label">Peso (kg)</label>
+                                <input type="text" class="form-control" id="petWeight" [(ngModel)]="editPet.petWeight"
+                                    name="petWeight" required>
+                                <div *ngIf="errors?.petWeight" class="text-danger small">{{ errors.petWeight[0] }}</div>
+                            </div>
+
+                            <!-- Color de la Mascota -->
+                            <div class="col-md-6 mt-3">
+                                <label for="petColor" class="form-label">Color</label>
+                                <input type="text" class="form-control" id="petColor" [(ngModel)]="editPet.petColor"
+                                    name="petColor" required>
+                                <div *ngIf="errors?.petColor" class="text-danger small">{{ errors.petColor[0] }}</div>
+                            </div>
+
+                            <!-- Género de la Mascota -->
+                            <div class="col-md-6 mt-3">
+                                <label for="petGender" class="form-label">Género</label>
+                                <select class="form-select" id="petGender" [(ngModel)]="editPet.petGender"
+                                    name="petGender" required>
+                                    <option value="" disabled selected>Seleccione el Género</option>
+                                    <option value="Macho">Macho</option>
+                                    <option value="Hembra">Hembra</option>
+                                </select>
+                                <div *ngIf="errors?.petGender" class="text-danger small">{{ errors.petGender[0] }}</div>
+                            </div>
+
+                            <!-- Cliente (Dueño) -->
+                            <div class="col-md-6 mt-3">
+                                <label for="clients" class="form-label">Dueño</label>
+                                <ng-select [items]="clients" bindLabel="clientName" bindValue="id"
+                                    placeholder="Seleccione el dueño" [(ngModel)]="editPet.clients_id" name="clients_id"
+                                    required>
+                                </ng-select>
+                                <div *ngIf="errors?.clients_id" class="text-danger small">{{ errors.clients_id[0] }}
+                                </div>
+                            </div>
+
+                            <!-- Información Adicional -->
+                            <div class="col-md-12 mt-3">
+                                <label for="petAdditional" class="form-label">Información Adicional</label>
+                                <textarea class="form-control" id="petAdditional" rows="3"
+                                    [(ngModel)]="editPet.petAdditional" name="petAdditional"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección Derecha: Imagen de la Mascota -->
+                    <div class="col-md-3">
+                        <!-- CropperJS para la imagen de la mascota -->
+                        <div class="col-md-12 text-center">
+                            <label class="form-label">Fotografía de la Mascota</label>
+                            <img [src]="editPet.petPhoto ? serverUrl + editPet.petPhoto : 'assets/images/default/blank-photo.png'"
+                                class="img-fluid" *ngIf="editPet.petPhoto">
+                            <img [src]="'assets/images/default/blank-photo.png'" class="img-fluid"
+                                *ngIf="!editPet.petPhoto">
+                            <img *ngIf="croppedImage" [src]="croppedImage" class="img-fluid">
+                            <div class="btn btn-light mt-3 me-2" (click)="cropModal.show()"><i class="bi bi-search"></i> Buscar</div>
+                            <button [disabled]="!croppedImage" class="btn btn-warning mt-3" (click)="resetCrop()"><i class="ri-refresh-line"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12 text-end">
+                        <button type="button" class="btn btn-dark me-2" (click)="goBack()">
+                            <i class="feather icon-arrow-left-circle"></i> Regresar
+                        </button>
+                        <!-- Botón para resetear el formulario -->
+                        <button type="button" class="btn btn-danger me-2" (click)="resetForm(petForm)">
+                            <i class="feather icon-refresh-cw"></i> Resetear
+                        </button>
+                        <button type="submit" class="btn btn-primary" [disabled]="petForm.invalid">
+                            <i class="feather icon-check-circle"></i> Actualizar Mascota
+                        </button>
+                    </div>
+
+                </form>
+            </div><!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+    <!-- end col -->
+</div>
+
+<!-- Modal Crop -->
+<div bsModal #cropModal="bs-modal" [config]="configModal" id="cropModal" class="modal fade" tabindex="-1"
+    aria-labelledby="cropModal" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropModal">Buscar Foto</h5>
+                <button type="button" class="btn-close" (click)="cropModal.hide()"></button>
+            </div>
+            <div class="modal-body text-center">
+                <angular-cropper #cropper [cropperOptions]="config" [imageUrl]="imageUrl"
+                    style="width: 100%;"></angular-cropper>
+            </div>
+            <div class="modal-footer">
+                <div class="">
+                    <label for="file-upload" class="btn btn-info mt-3 btn-wd-100">Seleccionar Imagen</label>
+                    <input id="file-upload" type="file" (change)="handleFileInput($event)" accept="image/*"
+                        class="file-hidden">
+                </div>
+                <div class="">
+                    <div *ngIf="imageUrl" class="btn btn-primary mt-3 btn-wd-100"
+                        (click)="cropImage(); cropModal.hide()">
+                        Aceptar</div>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

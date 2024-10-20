@@ -29,7 +29,7 @@
                             <div class="col-md-6">
                                 <label for="petBirthDate" class="form-label">Fecha de Nacimiento</label>
                                 <input [(ngModel)]="newPet.petBirthDate" type="text" class="form-control" mwlFlatpickr
-                                    [altInput]="true" altFormat="d M, Y" dateFormat="d M, Y" name="dp">
+                                    [altInput]="true" altFormat="d M, Y" dateFormat="d M, Y" name="dp" readonly>
                                 <div *ngIf="errors?.petBirthDate" class="text-danger small">{{ errors.petBirthDate[0] }}
                                 </div>
                             </div>
