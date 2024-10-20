@@ -41,16 +41,11 @@
                         <span class="ti ti-x search-widget-icon search-widget-icon-close d-none"
                             id="search-close-options" (click)="closeBtn()"></span>
                     </div>
-                    <div *ngIf="searchResults.length > 0" class="dropdown-menu dropdown-menu-lg show"
-                        id="search-dropdown">
+                    <div id="search-dropdown" class="dropdown-menu dropdown-menu-lg"
+                        [class.show]="searchResults !== null">
                         <ngx-simplebar style="max-height: 320px;">
-                            <!-- Encabezado -->
-                            <div class="dropdown-header">
-                                <h6 class="text-overflow fs-sm text-muted mb-1 text-uppercase">Resultados de Búsqueda
-                                </h6>
-                            </div>
+                            <!-- Mostrar resultados si hay mascotas -->
                             <div *ngIf="searchResults && searchResults.length > 0">
-                                <!-- Iterar sobre los resultados de búsqueda -->
                                 <div *ngFor="let pet of searchResults" class="dropdown-item bg-transparent text-wrap">
                                     <a href="javascript:void(0);" class="dropdown-item notify-item py-2"
                                         (click)="goToPetProfile(pet.id)">
@@ -66,15 +61,15 @@
                                     </a>
                                 </div>
                             </div>
-                            <div *ngIf="searchResults && searchResults.length === 0"
-                                class="dropdown-item bg-transparent text-wrap">
+                            <!-- Mostrar mensaje si no hay resultados -->
+                            <div *ngIf="searchResults !== null && searchResults.length === 0"
+                                class="text-center pt-3 pb-1">
                                 No se encontraron resultados.
                             </div>
+                            <div class="text-center pt-3 pb-1">
+                                <a href="javascript:void(0);" class="btn btn-primary btn-sm" (click)="viewAll()">Ver Todos <i class="ri-arrow-right-line ms-1"></i></a>
+                            </div>
                         </ngx-simplebar>
-                        <div class="text-center pt-3 pb-1">
-                            <a href="javascript:void(0);" (click)="viewAll()" class="btn btn-primary btn-sm">Ver Todos
-                                <i class="ri-arrow-right-line ms-1"></i></a>
-                        </div>
                     </div>
                 </form>
             </div>

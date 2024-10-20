@@ -60,7 +60,7 @@ export class TopbarComponent implements OnInit {
   deleteid: any;
 
   // Buscador
-  searchResults: any[] = [];
+  searchResults: any[] | null = null;
   searchTerm$ = new Subject<string>();
   serverUrl: string;
 
@@ -218,7 +218,6 @@ export class TopbarComponent implements OnInit {
   Search(): void {
     const input = document.getElementById('search-options') as HTMLInputElement;
     const searchOptions = document.getElementById('search-close-options') as HTMLElement;
-    const dropdown = document.getElementById('search-dropdown') as HTMLElement;
 
     const filter = input.value.trim();
     const inputLength = filter.length;
@@ -229,15 +228,14 @@ export class TopbarComponent implements OnInit {
         (response) => {
           if (response.success) {
             this.searchResults = response.data;
-            this.showSearchDropdown(response.data.length > 0);
           } else {
             this.searchResults = [];
-            this.showSearchDropdown(response.data.length === 0);
           }
+          this.showSearchDropdown(true); // Mostrar el dropdown sin importar si hay resultados o no
         },
         (error) => {
           this.searchResults = [];
-          this.showSearchDropdown(false);
+          this.showSearchDropdown(true); // Mostrar el dropdown para mostrar el mensaje de error
           this.utilitiesService.showAlert('error', 'No se pudieron cargar las mascotas');
         }
       );
@@ -247,7 +245,7 @@ export class TopbarComponent implements OnInit {
       // Si el input tiene menos de 3 caracteres, cerrar el dropdown y ocultar la X de búsqueda
       this.showSearchDropdown(false);
       searchOptions.classList.add('d-none');
-      this.searchResults = [];
+      this.searchResults = null; // Reiniciar el estado a null
     }
   }
 
